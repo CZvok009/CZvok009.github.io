@@ -3,257 +3,400 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Procesně.ai | Pragmatičtí AI integrátoři pro české SME</title>
+    <title>ProcesAI &mdash; Integrace umělé inteligence a automatizace pro SME</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #090D16; color: #F1F5F9; }
-    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: { 950: '#020617' },
+                        cyan: { 400: '#22d3ee', 500: '#06b6d4' }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="min-h-screen">
+<body class="bg-slate-950 text-slate-100 font-sans leading-relaxed selection:bg-cyan-500 selection:text-slate-950">
 
-    <!-- NAVIGATION -->
-    <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-            <div class="font-black tracking-wider text-xl bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                PROCESNĚ<span class="text-white">.AI</span>
+    <nav class="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md fixed top-0 w-full z-50">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-3 h-3 bg-cyan-400 rounded-full shadow-[0_0_12px_#22d3ee]"></div>
+                <span class="font-bold text-xl tracking-wider text-white">PROCES<span class="text-cyan-400">AI</span></span>
             </div>
-            <div class="text-sm text-slate-400 hidden md:block">
-                <span>⚡️ Neomezené n8n exekuce</span> <span class="mx-2">•</span> <span>🔒 Data zůstávají v ČR</span>
+            <div class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
+                <a href="#kalkulacka" class="hover:text-cyan-400 transition-colors">Kalkulačka úspor</a>
+                <a href="#sluzby" class="hover:text-cyan-400 transition-colors">Co nabízíme</a>
+                <a href="#srovnani" class="hover:text-cyan-400 transition-colors">Proč my</a>
+                <a href="#kontakt" class="bg-cyan-500 text-slate-950 px-4 py-2 rounded-lg font-semibold hover:bg-cyan-400 transition-all">Poptat audit</a>
             </div>
-            <a href="#kalkulacka" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold px-4 py-2 rounded text-sm transition">
-                Spočítat úsporu
+        </div>
+    </nav>
+
+    <header class="pt-36 pb-20 px-6 max-w-5xl mx-auto text-center">
+        <div class="inline-block bg-slate-900 border border-slate-800 px-4 py-1.5 rounded-full text-xs font-semibold text-cyan-400 mb-6 uppercase tracking-widest">
+            Nová éra efektivity pro české firmy
+        </div>
+        <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-6">
+            Přestaňte platit lidi za mačkání <br class="hidden md:inline">
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">Ctrl+C a Ctrl+V</span>
+        </h1>
+        <p class="text-lg md:text-xl text-slate-400 max-w-3xl mx-auto mb-10">
+            Implementujeme autonomní AI agenty a n8n integrace do firem o 10 až 200 zaměstnancích. 
+            Zbavíme váš back-office manuální rutiny s návratností investice do 30 dnů.
+        </p>
+        <div class="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="#kalkulacka" class="bg-cyan-500 text-slate-950 font-bold px-8 py-4 rounded-xl hover:bg-cyan-400 transition-all shadow-[0_0_25px_rgba(34,211,238,0.3)]">
+                Spočítat finanční úsporu
+            </a>
+            <a href="#sluzby" class="bg-slate-900 border border-slate-700 text-slate-200 font-semibold px-8 py-4 rounded-xl hover:bg-slate-800 transition-all">
+                Jak to funguje
             </a>
         </div>
     </header>
 
-    <!-- HERO SECTION -->
-    <section class="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-xs text-cyan-400 font-semibold mb-6">
-            <span>🚀 Novinka: Nasazujeme self-hosted AI bez plateb za API volání</span>
-        </div>
-        <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-6 max-w-4xl mx-auto leading-tight">
-            Nenabízíme „AI strategie“ v PowerPointu. <br>
-            <span class="bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                Píšeme kód, který vaší back-office ušetří 60 hodin měsíčně.
-            </span>
-        </h1>
-        <p class="text-lg text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-            Stavíme na míru šité orchestrace pro české firmy s 20–200 zaměstnanci. Parsování PDF objednávek, lokální prohledávání smluv a automatizace rutiny s garantovanou návratností.
-        </p>
-        <div class="flex flex-wrap justify-center gap-4">
-            <a href="#kalkulacka" class="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black px-8 py-4 rounded-lg text-base shadow-lg shadow-cyan-500/20 transition">
-                Kalkulačka úspory času ↓
-            </a>
-            <a href="#audit" class="bg-slate-800 hover:bg-slate-700 text-white font-semibold px-8 py-4 rounded-lg text-base border border-slate-700 transition">
-                Chci rentgen našich procesů
-            </a>
-        </div>
-    </section>
-
-    <!-- THE CALCULATOR SECTION -->
-    <section id="kalkulacka" class="max-w-6xl mx-auto px-6 py-16">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 md:p-12 shadow-2xl relative overflow-hidden">
-            <div class="absolute -right-24 -bottom-24 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
+    <section id="kalkulacka" class="py-20 px-6 max-w-7xl mx-auto">
+        <div class="bg-slate-900/60 border border-cyan-500/30 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
+            
             <div class="max-w-2xl mb-10">
-                <h2 class="text-2xl md:text-3xl font-black mb-2">Spočítejte si reálnou úsporu</h2>
-                <p class="text-slate-400 text-sm">Vyberte svůj obor, nastavte velikost back-office a podívejte se, co pro vás zítra můžeme postavit.</p>
+                <h2 class="text-2xl md:text-3xl font-bold text-white mb-3">Kalkulačka skrytých rezerv</h2>
+                <p class="text-slate-400 text-sm">
+                    Vyberte svůj obor. Náš model automaticky detekuje nejčastější procesní brzdu ve vašem odvětví a vypočítá, kolik prostředků měsíčně pálíte ručním přepisováním.
+                </p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                 
-                <!-- INPUTS (Left 7 cols) -->
                 <div class="lg:col-span-7 space-y-6">
-                    
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">1. V jakém oboru podnikáte?</label>
-                        <select id="obor" onchange="prepocitej()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white font-medium focus:outline-none focus:border-cyan-500">
-                            <option value="spedice">Spedice, logistika a autodoprava</option>
-                            <option value="pravo">Advokátní kancelář / Právní oddělení</option>
-                            <option value="ecommerce">E-commerce / Větší e-shop (Shoptet)</option>
-                            <option value="vyroba">Výrobní firma / Stavebnictví</option>
-                            <option value="ucetnictvi">Účetní / Administrativní agentura</option>
+                        <label for="industry-select" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">1. Vyberte obor podnikání</label>
+                        <select id="industry-select" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400">
+                            <option value="logistics">Spedice, logistika a autodoprava</option>
+                            <option value="law">Právo, advokacie a audity</option>
+                            <option value="ecommerce">E-commerce (e-shopy s obratem 30M+)</option>
+                            <option value="manufacturing">Výrobní firma / B2B obchod</option>
+                            <option value="accounting">Účetní a administrativní kancelář</option>
                         </select>
                     </div>
 
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <label class="text-xs font-bold uppercase tracking-wider text-slate-400">2. Počet lidí v administrativě / back-office:</label>
-                            <span id="pocet-lidi-text" class="text-cyan-400 font-black text-lg">5 lidí</span>
-                        </div>
-                        <input type="range" id="pocet-lidi" min="1" max="30" value="5" oninput="prepocitej()" class="w-full accent-cyan-500 bg-slate-950 h-2 rounded-lg cursor-pointer">
-                        <div class="flex justify-between text-[10px] text-slate-500 mt-1">
-                            <span>1 člověk</span>
-                            <span>15 lidí</span>
-                            <span>30+ lidí</span>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">3. Největší brzda vašeho dne?</label>
-                        <select id="problem" onchange="prepocitej()" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-4 py-3 text-white font-medium focus:outline-none focus:border-cyan-500">
-                            <option value="pdf">Ruční přepisování PDF objednávek a faktur do ERP</option>
-                            <option value="dotazy">Nekonečné odpovídání na rutinní e-maily zákazníků</option>
-                            <option value="reserse">Zdlouhavé dohledávání informací ve starých smlouvách/Wordech</option>
-                            <option value="data">Kopírování dat mezi Excelem a podnikovým systémem</option>
-                        </select>
-                    </div>
-
-                </div>
-
-                <!-- OUTPUT DISPLAY CARD (Right 5 cols) -->
-                <div class="lg:col-span-5 bg-slate-950 border-2 border-cyan-500/30 rounded-xl p-6 relative">
-                    <div class="absolute -top-3 left-6 bg-cyan-500 text-slate-950 text-[10px] font-black uppercase px-2 py-0.5 rounded">
-                        Odhadovaný výsledek
-                    </div>
-
-                    <div class="space-y-6 pt-2">
-                        <div class="border-b border-slate-800 pb-4">
-                            <div class="text-xs text-slate-400 mb-1">Měsíčně ušetříme lidem:</div>
-                            <div class="text-4xl font-black text-white"><span id="vysledek-hodiny" class="text-cyan-400">140</span> <span class="text-xl font-normal text-slate-400">hodin rutiny</span></div>
-                        </div>
-
-                        <div class="border-b border-slate-800 pb-4">
-                            <div class="text-xs text-slate-400 mb-1">Finanční ekvivalent ušetřeného času*:</div>
-                            <div class="text-3xl font-black text-emerald-400"><span id="vysledek-penize">58 800</span> <span class="text-lg font-normal">Kč / měsíc</span></div>
-                            <div class="text-[10px] text-slate-500 mt-1">*Počítáno s průměrnou superhrubou mzdou back-office 420 Kč/h</div>
-                        </div>
-
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                         <div>
-                            <div class="text-xs font-bold text-slate-400 uppercase mb-2">Navrhované řešení pro váš obor:</div>
-                            <div id="vysledek-nazev" class="font-bold text-white text-sm bg-slate-900 p-2.5 rounded border border-slate-800 mb-2">
-                                📦 Autonomní dispečerský parser v1.0
-                            </div>
-                            <div class="text-xs text-slate-400 flex items-center gap-1.5">
-                                <span class="text-cyan-400">⚙️ Tech stack:</span> <span id="vysledek-stack" class="font-mono text-slate-300">n8n.io self-hosted + Qdrant + Claude 3.5</span>
-                            </div>
+                            <label for="total-emp" class="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">2. Celkový počet lidí ve firmě</label>
+                            <input type="number" id="total-emp" value="35" min="3" max="500" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 font-semibold">
                         </div>
+                        <div>
+                            <label for="routine-emp" class="block text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">3. Počet lidí zasažených rutinou</label>
+                            <input type="number" id="routine-emp" value="12" min="1" max="500" class="w-full bg-slate-950 border border-cyan-500/50 rounded-xl px-4 py-3 text-cyan-300 focus:outline-none focus:border-cyan-400 font-semibold">
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950/80 p-4 rounded-xl border border-slate-800">
+                        <span class="text-xs text-slate-400 uppercase tracking-wider block font-semibold mb-1">Detekované úzké hrdlo pro tento obor:</span>
+                        <span id="detected-agenda" class="text-sm font-bold text-cyan-300">Manuální přepisování objednávek z PDF do interního systému</span>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 bg-gradient-to-br from-cyan-950/30 to-slate-950 border border-cyan-500/30 rounded-2xl p-8 flex flex-col justify-between space-y-8">
+                    <div>
+                        <span class="text-xs font-bold uppercase tracking-widest text-slate-400 block mb-1">Konzervativní odhad úspory</span>
+                        <div class="text-4xl md:text-5xl font-black text-white tracking-tight" id="out-hours">420 hod</div>
+                        <span class="text-xs text-cyan-400 font-medium">Ušetřený čistý čas každý jediný měsíc</span>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-800">
+                        <span class="text-xs font-bold uppercase tracking-widest text-slate-400 block mb-1">Převedeno na mzdové náklady</span>
+                        <div class="text-4xl md:text-5xl font-black text-cyan-400 tracking-tight" id="out-money">1 612 800 Kč</div>
+                        <span class="text-xs text-slate-400 font-medium">Roční finanční úspora firmy (vč. superhrubé mzdy)</span>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-800 flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-widest text-slate-400 block">Návratnost (PoC)</span>
+                            <span class="text-2xl font-extrabold text-white" id="out-payback">cca 3 týdny</span>
+                        </div>
+                        <a href="#kontakt" class="bg-white text-slate-950 text-sm font-bold px-5 py-2.5 rounded-lg hover:bg-cyan-400 hover:text-slate-950 transition-all">
+                            Získat toto řešení
+                        </a>
                     </div>
                 </div>
 
             </div>
+
         </div>
     </section>
 
-    <!-- 3 CZECH "NOs" -->
-    <section class="max-w-5xl mx-auto px-6 py-12">
-        <div class="text-center max-w-xl mx-auto mb-12">
-            <h2 class="text-2xl font-black mb-2">Rozumíme vaší paranoie</h2>
-            <p class="text-slate-400 text-sm">Víme, proč se české firmy bojí pustit si do systémů umělou inteligenci. Proto garantujeme:</p>
+    <section id="sluzby" class="py-20 px-6 max-w-7xl mx-auto">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+            <h2 class="text-3xl font-bold text-white mb-4">Co přesně pro vaši firmu postavíme</h2>
+            <p class="text-slate-400">Nestavíme powerpointové strategie. Dodáváme hotové datové dálnice, které začnou pracovat okamžitě po nasazení.</p>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-6">
-            <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-xl">
-                <div class="text-red-400 font-black text-lg mb-2">1. ŽÁDNÉ úniky dat</div>
-                <p class="text-slate-400 text-xs leading-relaxed">Vaše faktury a smlouvy neposíláme do veřejných LLM k natrénování. Využíváme výhradně Zero-Data-Retention rozhraní nebo modely běžící fyzicky u vás.</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl hover:border-slate-700 transition-all flex flex-col justify-between">
+                <div>
+                    <span class="text-cyan-400 text-sm font-bold uppercase tracking-wider block mb-2">01 / Rentgen</span>
+                    <h3 class="text-xl font-bold text-white mb-3">Procesní audit back-officu</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Strávíme den s vašimi referenty. Najdeme agendy, kde se nejvíce plýtvá lidským potenciálem, a předložíme exaktní matematický model návratnosti.
+                    </p>
+                </div>
+                <ul class="mt-6 space-y-2 text-xs text-slate-300 border-t border-slate-800 pt-4">
+                    <li>&bull; Identifikace tzv. Krvácivého krku</li>
+                    <li>&bull; Bezpečnostní analýza toku dat</li>
+                    <li>&bull; Návrh cílové n8n architektury</li>
+                </ul>
             </div>
-            <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-xl">
-                <div class="text-red-400 font-black text-lg mb-2">2. ŽÁDNÉ taxametry</div>
-                <p class="text-slate-400 text-xs leading-relaxed">Nenasazujeme platformy, kde platíte 20 haléřů za každý průchod dat. Náš orchestrační engine (n8n) vám běží na serveru za fixních 400 Kč měsíčně neomezeně.</p>
+
+            <div class="bg-slate-900 border border-cyan-500/40 p-8 rounded-2xl relative flex flex-col justify-between shadow-[0_0_30px_rgba(6,182,212,0.15)]">
+                <div class="absolute -top-3 right-6 bg-cyan-500 text-slate-950 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider">
+                    Nejžádanější
+                </div>
+                <div>
+                    <span class="text-cyan-400 text-sm font-bold uppercase tracking-wider block mb-2">02 / Orchestrace</span>
+                    <h3 class="text-xl font-bold text-white mb-3">Autonomní n8n Workflows</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Propojíme váš firemní e-mail s účetním systémem (Pohoda, Helios, ABRA). E-maily s objednávkami se samy přečtou, zkontrolují a zapíší.
+                    </p>
+                </div>
+                <ul class="mt-6 space-y-2 text-xs text-slate-300 border-t border-slate-800 pt-4">
+                    <li>&bull; Fixní a neomezený počet exekucí</li>
+                    <li>&bull; Nasazení na vaší vlastní subdoméně</li>
+                    <li>&bull; Stoprocentní doručitelnost do ERP</li>
+                </ul>
             </div>
-            <div class="bg-slate-900/50 border border-slate-800 p-6 rounded-xl">
-                <div class="text-red-400 font-black text-lg mb-2">3. ŽÁDNÝ vendor lock-in</div>
-                <p class="text-slate-400 text-xs leading-relaxed">Ke všemu, co naprogramujeme, dostáváte plný zdrojový kód a dokumentaci. Pokud se s námi za rok rozloučíte, vaše automatizace poběží dál.</p>
+
+            <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl hover:border-slate-700 transition-all flex flex-col justify-between">
+                <div>
+                    <span class="text-cyan-400 text-sm font-bold uppercase tracking-wider block mb-2">03 / Suverenita</span>
+                    <h3 class="text-xl font-bold text-white mb-3">Firemní RAG (Bezpečné AI)</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Naučíme umělou inteligenci číst váš interní archiv smluv a směrnic. Vaši zaměstnanci dostanou interní chat, který zná odpověď na každý předpis.
+                    </p>
+                </div>
+                <ul class="mt-6 space-y-2 text-xs text-slate-300 border-t border-slate-800 pt-4">
+                    <li>&bull; Možnost chodu v Air-Gapped režimu</li>
+                    <li>&bull; Citlivá data nikdy neopustí server</li>
+                    <li>&bull; Okamžité citace s odkazem na zdroj</li>
+                </ul>
+            </div>
+
+        </div>
+    </section>
+
+    <section id="srovnani" class="py-20 px-6 max-w-5xl mx-auto">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 md:p-12">
+            <h2 class="text-2xl md:text-3xl font-bold text-white mb-8 text-center">Proč si nevybrat nadnárodní konzultační giganty?</h2>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-800 text-xs uppercase tracking-wider text-slate-400">
+                            <th class="py-4 px-4">Parametr</th>
+                            <th class="py-4 px-4 text-slate-500">Velká konzultační čtyřka</th>
+                            <th class="py-4 px-4 text-cyan-400 font-bold">ProcesAI (Náš přístup)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm divide-y divide-slate-800/60">
+                        <tr>
+                            <td class="py-4 px-4 font-semibold text-white">Cenová hladina</td>
+                            <td class="py-4 px-4 text-slate-400">1 500 000 Kč+ (platíte režii jejich kanceláří)</td>
+                            <td class="py-4 px-4 text-cyan-300 font-bold">45 000 &ndash; 150 000 Kč za vyřešený proces</td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 px-4 font-semibold text-white">Rychlost dodání</td>
+                            <td class="py-4 px-4 text-slate-400">6 až 12 měsíců (fáze schvalování)</td>
+                            <td class="py-4 px-4 text-cyan-300 font-bold">14 pracovních dnů do ostrého provozu</td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 px-4 font-semibold text-white">Technologie</td>
+                            <td class="py-4 px-4 text-slate-400">Komerční cloud s drahými licencemi</td>
+                            <td class="py-4 px-4 text-cyan-300 font-bold">Self-hosted n8n bez poplatků za transakce</td>
+                        </tr>
+                        <tr>
+                            <td class="py-4 px-4 font-semibold text-white">Výstup schůzky</td>
+                            <td class="py-4 px-4 text-slate-400">Prezentace o 60 snímcích v PowerPointu</td>
+                            <td class="py-4 px-4 text-cyan-300 font-bold">Funkční kód napojený na vaše testovací data</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </section>
 
-    <!-- CALL TO ACTION / AUDIT FORM -->
-    <section id="audit" class="bg-gradient-to-b from-slate-900 to-slate-950 border-t border-slate-800 py-20 mt-12">
-        <div class="max-w-3xl mx-auto px-6 text-center">
-            <span class="text-cyan-400 font-bold text-xs uppercase tracking-widest block mb-2">Otestujte nás zdarma</span>
-            <h2 class="text-3xl font-black mb-4">Pošlete nám svůj „nejhloupější“ proces</h2>
-            <p class="text-slate-400 text-sm max-w-xl mx-auto mb-8">
-                Nahrajte nám do formuláře jedno prázdné PDF objednávky, vzor typického e-mailu nebo ceník. Do 48 hodin vám pošleme soukromé video (Loom), kde uvidíte ten samý dokument automaticky propadnutý do testovací databáze.
+    <section id="kontakt" class="py-20 px-6 max-w-3xl mx-auto text-center">
+        <div class="bg-gradient-to-b from-cyan-950/20 to-slate-900 border border-slate-800 rounded-3xl p-8 md:p-14">
+            <h2 class="text-3xl font-bold text-white mb-4">Udělejte první krok k digitální suverenitě</h2>
+            <p class="text-slate-400 text-sm mb-8 max-w-xl mx-auto">
+                Vyplňte formulář níže. Do 24 hodin se vám ozveme, vyžádáme si od vás jeden vzorový dokument a zdarma vám nahrajeme video ukázku, jak jej náš software automaticky zpracuje.
             </p>
 
-            <form onsubmit="alert('Odesláno! V reálné verzi by se dokument odeslal na váš e-mail přes n8n webhook.'); return false;" class="bg-slate-900 border border-slate-700 rounded-xl p-6 text-left max-w-xl mx-auto space-y-4">
+            <form id="contact-form" class="space-y-4 text-left max-w-md mx-auto">
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Váš firemní e-mail:</label>
-                    <input type="email" required placeholder="reditel@firma.cz" class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-500">
+                    <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Jméno a příjmení</label>
+                    <input type="text" required placeholder="Ing. Petr Novák" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 text-sm">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-slate-300 mb-1">Popište proces, u kterého trpíte:</label>
-                    <textarea rows="3" placeholder="Každé ráno nám chodí od 15 dodavatelů PDFka, která dvě paní na podpoře 4 hodiny přepisují do Heliosu..." class="w-full bg-slate-950 border border-slate-700 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-500"></textarea>
+                    <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Firemní e-mail</label>
+                    <input type="email" required placeholder="novak@firma.cz" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 text-sm">
                 </div>
-                <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black py-3 rounded text-sm transition cursor-pointer">
-                    Vyžádat video ukázku zdarma →
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-300 mb-1">Popis agendy, která vás nejvíce brzdí</label>
+                    <textarea rows="3" placeholder="Denně nám chodí 50 PDF poptávek, které musíme ručně datlovat do Pohody..." class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-cyan-400 text-sm"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black py-4 rounded-xl transition-all uppercase tracking-wider text-sm shadow-lg">
+                    Odeslat nezávaznou poptávku
                 </button>
             </form>
+
+            <div id="form-status" class="hidden bg-cyan-500/10 border border-cyan-500 text-cyan-300 p-6 rounded-2xl mt-6">
+                <span class="block font-bold text-lg mb-1">Poptávka byla úspěšně odeslána!</span>
+                <p class="text-xs text-slate-300">Děkujeme za důvěru. Náš technický tým právě analyzuje váš profil a brzy se s vámi spojíme.</p>
+            </div>
         </div>
     </section>
 
-    <!-- FOOTER -->
-    <footer class="border-t border-slate-900 py-8 text-center text-xs text-slate-600">
-        <p>Procesně.ai © 2026 • Vyvinuto pro pragmatické české podnikatele.</p>
+    <footer class="border-t border-slate-900 py-10 text-center text-xs text-slate-600">
+        <p>&copy; 2026 ProcesAI. Všechna práva vyhrazena. Kódováno s důrazem na čistou logiku.</p>
     </footer>
 
-    <!-- CALCULATOR JAVASCRIPT ENGINE -->
     <script>
-        // Datová matice: [Hodiny na člověka/měsíc, Název řešení, Tech Stack]
-        const matice = {
-            spedice: {
-                pdf: [28, "🚛 Autonomní dispečerská schránka (OCR -> ERP)", "n8n + Qdrant + lokální Tesseract OCR"],
-                dotazy: [18, "🚛 Klasifikátor přepravních poptávek", "n8n + OpenRouter (Claude 3.5 Sonnet)"],
-                reserse: [14, "🚛 Interní RAG nad smlouvami dopravců", "PostgreSQL (pgvector) + Ollama"],
-                data: [22, "🚛 Můstek ceníků: Excel <-> Helios/Pohoda", "n8n + Python Pandas Node"]
+        const industrySelect = document.getElementById('industry-select');
+        const totalEmpInput = document.getElementById('total-emp');
+        const routineEmpInput = document.getElementById('routine-emp');
+        const detectedAgendaText = document.getElementById('detected-agenda');
+        
+        const outputHours = document.getElementById('out-hours');
+        const outputMoney = document.getElementById('out-money');
+        const outputPayback = document.getElementById('out-payback');
+
+        // Sectoral parameters for financial modeling
+        const benchmarks = {
+            logistics: {
+                role: "Dispečink a ruční přepis objednávek přepravy z PDF do ERP",
+                hoursPerMonth: 35,
+                hourlyCost: 320,
+                defaultShare: 0.35
             },
-            pravo: {
-                pdf: [15, "⚖️ Anonymizátor a extraktor smluvních stran", "n8n + Azure Document Intelligence EU"],
-                dotazy: [12, "⚖️ Třídič klientských podání s prioritizací", "n8n + OpenAI API (Zero Retention)"],
-                reserse: [24, "⚖️ Air-gapped AI Koncipient (Lokální server)", "Lokální Ollama + Llama 3.1 8B + Qdrant"],
-                data: [10, "⚖️ Automatický výkaz klientských hodin z kalendáře", "n8n + iCal parser"]
+            law: {
+                role: "Rešerše judikátů, anonymizace smluv a příprava podání",
+                hoursPerMonth: 28,
+                hourlyCost: 450,
+                defaultShare: 0.25
             },
             ecommerce: {
-                pdf: [20, "🛒 B2B importér nestandardních objednávek", "n8n + Shoptet API konektor"],
-                dotazy: [30, "🛒 AI Support Asistent (Draft-only režim)", "n8n + SupportBox API + Claude 3.5"],
-                reserse: [15, "🛒 RAG nad technickými manuály produktů", "Qdrant Vector DB + Shoptet doplňky"],
-                data: [25, "🛒 Noční synchronizátor skladových feedů", "n8n + FTP/XML stream node"]
+                role: "Zákaznická podpora (dotazy na stav) a překlady feedů",
+                hoursPerMonth: 42,
+                hourlyCost: 280,
+                defaultShare: 0.40
             },
-            vyroba: {
-                pdf: [26, "🏭 Automatický zakladač poptávek do výroby", "n8n + ABRA/K2 ERP API"],
-                dotazy: [14, "🏭 Dodavatelský status bot", "n8n + e-mailový webhook"],
-                reserse: [20, "🏭 Inteligentní prohledávač norem (ISO/ČSN)", "Milvus Vector DB + lokální embedding"],
-                data: [24, "🏭 Sběrač výrobních dat z Excelů mistrů", "n8n + Microsoft Graph API"]
+            manufacturing: {
+                role: "Párování nákupních faktur a manuální tvorba nabídek",
+                hoursPerMonth: 30,
+                hourlyCost: 350,
+                defaultShare: 0.30
             },
-            ucetnictvi: {
-                pdf: [32, "📊 Vytěžovač nestrukturovaných dokladů a účtenek", "n8n + Rossum.ai / Digitoo API"],
-                dotazy: [16, "📊 Automatické urgence chybějících dokladů klientům", "n8n + SMTP send node"],
-                reserse: [18, "📊 RAG nad daňovými zákony a interní metodikou", "Qdrant + OpenAI GPT-4o"],
-                data: [28, "📊 Hromadný generátor kontrolních sestav", "n8n + Excel/CSV builder"]
+            accounting: {
+                role: "Zpracování bankovních výpisů a rozesílání upomínek",
+                hoursPerMonth: 45,
+                hourlyCost: 360,
+                defaultShare: 0.50
             }
         };
 
-        function prepocitej() {
-            const obor = document.getElementById("obor").value;
-            const pocetLidi = parseInt(document.getElementById("pocet-lidi").value);
-            const problem = document.getElementById("problem").value;
-
-            // Zobrazení textu posuvníku
-            let sklonovani = "lidí";
-            if(pocetLidi === 1) sklonovani = "člověk";
-            if(pocetLidi >= 2 && pocetLidi <= 4) sklonovani = "lidé";
-            document.getElementById("pocet-lidi-text").innerText = pocetLidi + " " + sklonovani;
-
-            // Výpočet z matice
-            const dataOboru = matice[obor][problem] || matice.spedice.pdf; // Fallback
-            const usteporNaCloveka = dataOboru[0];
-            const nazevReseni = dataOboru[1];
-            const stackReseni = dataOboru[2];
-
-            const celkoveHodiny = usteporNaCloveka * pocetLidi;
-            const celkovePenize = celkoveHodiny * 420; // 420 Kč/h superhrubá
-
-            // Vykreslení do DOMu s jemnou animací čísla (čisté JS)
-            document.getElementById("vysledek-hodiny").innerText = celkoveHodiny;
-            document.getElementById("vysledek-penize").innerText = celkovePenize.toLocaleString("cs-CZ");
-            document.getElementById("vysledek-nazev").innerText = nazevReseni;
-            document.getElementById("vysledek-stack").innerText = stackReseni;
+        // Recalculate affected employee count based on default industry share
+        function handleTotalEmpChange() {
+            const key = industrySelect.value;
+            const total = parseInt(totalEmpInput.value) || 0;
+            const share = benchmarks[key].defaultShare;
+            const suggestedRoutine = Math.max(1, Math.round(total * share));
+            routineEmpInput.value = suggestedRoutine;
+            calculateROI();
         }
 
-        // První inicializace po načtení
-        prepocitej();
+        // Core logic for computing ROI indicators
+        function calculateROI() {
+            const key = industrySelect.value;
+            const activeSector = benchmarks[key];
+            
+            detectedAgendaText.textContent = activeSector.role;
+
+            const routineCount = parseInt(routineEmpInput.value) || 0;
+            const savedHoursMonthly = routineCount * activeSector.hoursPerMonth;
+            const monthlyFinancialSavings = savedHoursMonthly * activeSector.hourlyCost;
+            const yearlyFinancialSavings = monthlyFinancialSavings * 12;
+
+            const estimatedProjectCost = 75000; 
+            const paybackMonths = estimatedProjectCost / (monthlyFinancialSavings || 1);
+            const paybackWeeks = Math.max(1, Math.round(paybackMonths * 4));
+
+            outputHours.textContent = savedHoursMonthly.toLocaleString('cs-CZ') + " hod";
+            outputMoney.textContent = yearlyFinancialSavings.toLocaleString('cs-CZ') + " Kč";
+            outputPayback.textContent = "cca " + paybackWeeks + " týdny";
+        }
+
+        // Attach DOM event listeners
+        industrySelect.addEventListener('change', handleTotalEmpChange);
+        totalEmpInput.addEventListener('input', handleTotalEmpChange);
+        routineEmpInput.addEventListener('input', calculateROI);
+
+        handleTotalEmpChange();
+
+        // Lead capture dispatch logic
+        const contactForm = document.getElementById('contact-form');
+        const formStatus = document.getElementById('form-status');
+
+        // Localtunnel webhook URL extracted from the user session
+        const N8N_WEBHOOK_URL = 'https://spotty-cups-bake.loca.lt/webhook-test/leads/capture';
+
+        contactForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const submitButton = contactForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = "Odesílám data...";
+
+            // Assemble payload matching n8n expectations
+            const payload = {
+                clientName: contactForm.querySelector('input[type="text"]').value,
+                clientEmail: contactForm.querySelector('input[type="email"]').value,
+                problemDescription: contactForm.querySelector('textarea').value,
+                selectedIndustry: industrySelect.value,
+                companySize: parseInt(totalEmpInput.value) || 0,
+                routineStaff: parseInt(routineEmpInput.value) || 0,
+                calculatedHoursSaved: outputHours.textContent,
+                calculatedYearlySavings: outputMoney.textContent,
+                submittedAt: new Date().toISOString()
+            };
+
+            try {
+                // Execute fetch with injected bypass header for Localtunnel
+                const response = await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'bypass-tunnel-reminder': 'true'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error status: ${response.status}`);
+                }
+
+                // Render success confirmation
+                contactForm.style.display = 'none';
+                formStatus.classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Payload dispatch failed:", error);
+                alert("Odeslání se nezdařilo. Zkontrolujte prosím připojení.");
+                submitButton.disabled = false;
+                submitButton.textContent = "Odeslat nezávaznou poptávku";
+            }
+        });
     </script>
 </body>
 </html>
