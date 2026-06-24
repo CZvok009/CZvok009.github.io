@@ -360,9 +360,8 @@
         const contactForm = document.getElementById('contact-form');
         const formStatus = document.getElementById('form-status');
 
-        // Webhook URL wrapped in a public CORS proxy to pass browser preflight validation
-        const TARGET_WEBHOOK = 'https://spotty-cups-bake.loca.lt/webhook-test/leads/capture';
-        const N8N_WEBHOOK_URL = 'https://corsproxy.io/?' + TARGET_WEBHOOK;
+        // Single immutable declaration of the target proxy endpoint
+        const N8N_WEBHOOK_URL = 'https://corsproxy.io/?https://spotty-cups-bake.loca.lt/webhook-test/leads/capture';
 
         contactForm.addEventListener('submit', async function(event) {
             event.preventDefault();
