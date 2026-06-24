@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -274,7 +275,7 @@
 
     <!-- Interactive Logic Script -->
     <script>
-        // DOM Elements
+        // DOM Elements declaration
         const industrySelect = document.getElementById('industry-select');
         const totalEmpInput = document.getElementById('total-emp');
         const routineEmpInput = document.getElementById('routine-emp');
@@ -284,7 +285,7 @@
         const outputMoney = document.getElementById('out-money');
         const outputPayback = document.getElementById('out-payback');
 
-        // Sectoral parameters for financial modeling
+        // Financial benchmark configuration matrix
         const benchmarks = {
             logistics: {
                 role: "Dispečink a ruční přepis objednávek přepravy z PDF do ERP",
@@ -318,7 +319,7 @@
             }
         };
 
-        // Recalculate affected employee count based on default industry share
+        // Dynamic calculation of affected workforce
         function handleTotalEmpChange() {
             const key = industrySelect.value;
             const total = parseInt(totalEmpInput.value) || 0;
@@ -328,7 +329,7 @@
             calculateROI();
         }
 
-        // Core logic for computing ROI indicators
+        // Main financial modeling computation
         function calculateROI() {
             const key = industrySelect.value;
             const activeSector = benchmarks[key];
@@ -349,19 +350,19 @@
             outputPayback.textContent = "cca " + paybackWeeks + " týdny";
         }
 
-        // Attach DOM event listeners
         industrySelect.addEventListener('change', handleTotalEmpChange);
         totalEmpInput.addEventListener('input', handleTotalEmpChange);
         routineEmpInput.addEventListener('input', calculateROI);
 
         handleTotalEmpChange();
 
-        // Lead capture dispatch logic
+        // Form submission dispatch logic
         const contactForm = document.getElementById('contact-form');
         const formStatus = document.getElementById('form-status');
 
-        // Single immutable declaration of the target proxy endpoint
-        const N8N_WEBHOOK_URL = 'https://corsproxy.io/?https://spotty-cups-bake.loca.lt/webhook-test/leads/capture';
+        // PASTE YOUR GENERATED CLOUDFLARE TUNNEL URL BELOW
+        const TARGET_TUNNEL = 'https://...trycloudflare.com';
+        const N8N_WEBHOOK_URL = TARGET_TUNNEL + '/webhook-test/leads/capture';
 
         contactForm.addEventListener('submit', async function(event) {
             event.preventDefault();
@@ -370,7 +371,6 @@
             submitButton.disabled = true;
             submitButton.textContent = "Odesílám data...";
 
-            // Assemble payload matching n8n expectations
             const payload = {
                 clientName: contactForm.querySelector('input[type="text"]').value,
                 clientEmail: contactForm.querySelector('input[type="email"]').value,
@@ -384,12 +384,11 @@
             };
 
             try {
-                // Execute fetch with injected bypass header for Localtunnel
+                // Execute clean POST request without artificial CORS bypass headers
                 const response = await fetch(N8N_WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 
-                        'Content-Type': 'application/json',
-                        'bypass-tunnel-reminder': 'true'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(payload)
                 });
@@ -398,7 +397,6 @@
                     throw new Error(`Server returned HTTP status: ${response.status}`);
                 }
 
-                // Render success confirmation
                 contactForm.style.display = 'none';
                 formStatus.classList.remove('hidden');
 
