@@ -29,6 +29,15 @@ $urlSaved = $false
         Write-Host " Radek pro index.html: tunnel_url_snippet.txt" -ForegroundColor Green
         Write-Host "========================================" -ForegroundColor Green
         Write-Host ""
+
+        $newUrl = (Get-Content -Path $urlFile -ErrorAction Stop).Trim()
+        $filePath = Join-Path $root "index.html"
+
+        $content = Get-Content -Path $filePath -Raw -ErrorAction Stop
+        $newContent = $content -replace "const TARGET_TUNNEL = '.*?';", "const TARGET_TUNNEL = '$newUrl';"
+        Set-Content -Path $filePath -Value $newContent -Encoding UTF8
+
+        Write-Host "Soubor index.html byl automaticky aktualizován na: $newUrl" -ForegroundColor Green
     }
 
     Write-Host $line
