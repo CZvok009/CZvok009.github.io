@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="cs" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Audit Report: Ucetnictvi a Finance 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        :root {
+            --cyan: #22d3ee;
+            --indigo: #818cf8;
+            --pink: #f472b6;
+            --amber: #fbbf24;
+            --green: #4ade80;
+            --bg: #020617;
+            --surface: rgba(15, 23, 42, 0.6);
+            --border: rgba(34, 211, 238, 0.12);
+            --muted: #94a3b8;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: #f1f5f9;
+            margin: 0;
+        }
+
+        /* Navigation styling */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(2, 6, 23, 0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            height: 56px;
+        }
+        .nav-inner::-webkit-scrollbar { display: none; }
+        .nav-pill {
+            white-space: nowrap;
+            padding: 0.35rem 0.9rem;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-decoration: none;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            flex-shrink: 0;
+        }
+        .nav-pill:hover { color: #f1f5f9; border-color: var(--border); }
+        .nav-pill.active { color: var(--bg); background: var(--cyan); }
+
+        /* Section labels */
+        .section-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 0.3rem 0.85rem;
+            border-radius: 999px;
+            margin-bottom: 1.25rem;
+        }
+
+        /* Glassmorphism containers */
+        .glass-panel {
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 24px -1px rgba(0,0,0,0.2);
+        }
+        .card-hover {
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+        .card-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px -4px rgba(0,0,0,0.35);
+        }
+
+        /* Step cards */
+        .step-card {
+            border-left: 3px solid var(--cyan);
+            transition: all 0.25s;
+        }
+        .step-card:hover {
+            background: rgba(34, 211, 238, 0.04);
+            transform: translateX(6px);
+        }
+
+        /* Gradient typography */
+        .gradient-text {
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--indigo) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Chart constraints */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            margin: 0 auto;
+            height: 320px;
+        }
+
+        /* Data tables */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+        .data-table th {
+            text-align: left;
+            padding: 0.6rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .data-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: #cbd5e1;
+            vertical-align: top;
+        }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+        /* Icon replacements */
+        .text-icon {
+            display: inline-block;
+            font-family: monospace;
+            font-weight: bold;
+            letter-spacing: 0;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        /* Code syntax highlighting */
+        .code-block {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #a5f3fc;
+            overflow-x: auto;
+            line-height: 1.7;
+        }
+        .code-comment { color: #475569; }
+        .code-key { color: var(--indigo); }
+        .code-val { color: var(--amber); }
+
+        /* Offsets and dividers */
+        section[id] { scroll-margin-top: 72px; }
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--border), transparent);
+            margin: 0;
+        }
+        .hero-bg {
+            background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(34,211,238,0.08) 0%, transparent 70%);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+<nav>
+    <div class="nav-inner">
+        <span style="font-size:0.72rem;font-weight:800;color:var(--cyan);margin-right:0.5rem;flex-shrink:0;">AUDIT REPORT</span>
+        <a href="#souhrn" class="nav-pill">01 Shrnutí</a>
+        <a href="#pipeline" class="nav-pill">02 OCR Pipeline</a>
+        <a href="#validace" class="nav-pill">03 Validace Dat</a>
+        <a href="#roi" class="nav-pill">04 Finanční ROI</a>
+        <a href="#implementace" class="nav-pill">05 Implementace</a>
+        <a href="#infrastruktura" class="nav-pill">06 Bezpečnost</a>
+    </div>
+</nav>
+
+<header class="hero-bg pt-20 pb-16 px-6">
+    <div style="max-width:960px;margin:0 auto;text-align:center;">
+        <div style="display:inline-block;padding:0.3rem 1rem;border-radius:999px;background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.2);color:var(--cyan);font-size:0.75rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.5rem;">
+            Segment: Účetnictví a Finanční správa
+        </div>
+        <h1 style="font-size:clamp(2.5rem,6vw,4.2rem);font-weight:800;line-height:1.1;margin:0 0 1.25rem;">
+            AI Procesní Audit:<br><span class="gradient-text">Automatizace vytěžování dokladů</span>
+        </h1>
+        <p style="color:var(--muted);font-size:1.1rem;max-width:640px;margin:0 auto 2.5rem;line-height:1.7;">
+            Identifikovali jsme kritické úzké hrdlo účetní agendy: manuální přepisování dat z přijatých faktur a účtenek. Níže naleznete návrh plně automatizované vytěžovací OCR linky.
+        </p>
+        <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;">
+            <div class="glass-panel" style="padding:1rem 1.5rem;border-radius:1rem;text-align:center;min-width:160px;">
+                <div style="font-size:1.8rem;font-weight:800;color:var(--cyan);">80 hod</div>
+                <div style="font-size:0.75rem;color:var(--muted);">Měsíční úspora času</div>
+            </div>
+            <div class="glass-panel" style="padding:1rem 1.5rem;border-radius:1rem;text-align:center;min-width:160px;">
+                <div style="font-size:1.8rem;font-weight:800;color:var(--green);">45 000 Kč</div>
+                <div style="font-size:0.75rem;color:var(--muted);">Odhadovaná úspora / měsíc</div>
+            </div>
+            <div class="glass-panel" style="padding:1rem 1.5rem;border-radius:1rem;text-align:center;min-width:160px;">
+                <div style="font-size:1.8rem;font-weight:800;color:var(--indigo);">14 dnů</div>
+                <div style="font-size:0.75rem;color:var(--muted);">Nasaditelnost do provozu</div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="section-divider"></div>
+
+<main style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
+
+<section id="souhrn" style="padding:5rem 0;">
+    <div class="section-eyebrow" style="background:rgba(34,211,238,0.08);color:var(--cyan);border:1px solid rgba(34,211,238,0.2);">
+        Sekce 01 — Diagnostika agendy
+    </div>
+    <h2 style="font-size:2rem;font-weight:800;margin:0 0 0.5rem;">Identifikovaná úzká hrdla provozu</h2>
+    <p style="color:var(--muted);margin:0 0 3rem;max-width:600px;">Při analýze toku finančních dokumentů byly nalezeny procesy s nejvyšší mírou rutinní zátěže, které způsobují přetížení týmu během měsíčních uzávěrek.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;">
+        <div class="glass-panel card-hover step-card" style="padding:1.75rem;border-radius:0 1.25rem 1.25rem 0;">
+            <div style="font-size:0.75rem;font-weight:800;color:var(--cyan);margin-bottom:0.5rem;">PROBLÉM 01</div>
+            <h4 style="font-size:1.2rem;font-weight:700;margin:0 0 0.75rem;">Manuální přepis faktur</h4>
+            <p style="font-size:0.85rem;color:var(--muted);line-height:1.6;margin:0;">Účetní oddělení tráví desítky hodin týdně čtením PDF souborů a skenů a jejich následným ručním přepisováním do účetního softwaru.</p>
+        </div>
+        <div class="glass-panel card-hover step-card" style="padding:1.75rem;border-radius:0 1.25rem 1.25rem 0;border-color:var(--amber);">
+            <div style="font-size:0.75rem;font-weight:800;color:var(--amber);margin-bottom:0.5rem;">PROBLÉM 02</div>
+            <h4 style="font-size:1.2rem;font-weight:700;margin:0 0 0.75rem;">Chybovost zadání</h4>
+            <p style="font-size:0.85rem;color:var(--muted);line-height:1.6;margin:0;">Vlivem únavy dochází k překlepům ve variabilních symbolech a číslech účtů, což vede ke zpožděným platbám a nutnosti manuálního párování v bance.</p>
+        </div>
+        <div class="glass-panel card-hover step-card" style="padding:1.75rem;border-radius:0 1.25rem 1.25rem 0;border-color:var(--pink);">
+            <div style="font-size:0.75rem;font-weight:800;color:var(--pink);margin-bottom:0.5rem;">PROBLÉM 03</div>
+            <h4 style="font-size:1.2rem;font-weight:700;margin:0 0 0.75rem;">Zpoždění při uzávěrkách</h4>
+            <p style="font-size:0.85rem;color:var(--muted);line-height:1.6;margin:0;">Skokový nárůst dokumentů na konci měsíce vytváří úzké hrdlo, které nelze vyřešit jinak než neefektivními a drahými přesčasy pracovníků.</p>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<section id="pipeline" style="padding:5rem 0;">
+    <div class="section-eyebrow" style="background:rgba(129,140,248,0.08);color:var(--indigo);border:1px solid rgba(129,140,248,0.2);">
+        Sekce 02 — Architektura pipeline
+    </div>
+    <h2 style="font-size:2rem;font-weight:800;margin:0 0 0.5rem;">Automatizovaný tok zpracování dokumentů</h2>
+    <p style="color:var(--muted);margin:0 0 3rem;max-width:600px;">Návrh logického toku v prostředí self-hosted n8n instance. Dokument je zpracován, validován proti rejstříkům a zaúčtován během několika sekund.</p>
+
+    <div class="glass-panel" style="padding:2rem;border-radius:1.25rem;margin-bottom:2rem;">
+        <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.5rem;color:var(--indigo);">Tok dat: Přijetí dokumentu až po zápis</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.75rem;align-items:center;">
+            <div style="background:rgba(129,140,248,0.08);border:1px solid rgba(129,140,248,0.2);border-radius:0.75rem;padding:1rem;text-align:center;">
+                <div style="font-size:0.7rem;font-weight:800;color:var(--indigo);margin-bottom:0.2rem;">VSTUP</div>
+                <div style="font-size:0.85rem;font-weight:700;">E-mail / Drive</div>
+                <div style="font-size:0.7rem;color:var(--muted);margin-top:0.2rem;">Detekce nového PDF</div>
+            </div>
+            <div style="text-align:center;color:var(--muted);font-weight:bold;">[+]</div>
+            <div style="background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.2);border-radius:0.75rem;padding:1rem;text-align:center;">
+                <div style="font-size:0.7rem;font-weight:800;color:var(--cyan);margin-bottom:0.2rem;">EXTRAKCE</div>
+                <div style="font-size:0.85rem;font-weight:700;">Vision AI Parser</div>
+                <div style="font-size:0.7rem;color:var(--muted);margin-top:0.2rem;">Vyčtení částek a údajů</div>
+            </div>
+            <div style="text-align:center;color:var(--muted);font-weight:bold;">[+]</div>
+            <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:0.75rem;padding:1rem;text-align:center;">
+                <div style="font-size:0.7rem;font-weight:800;color:var(--amber);margin-bottom:0.2rem;">KONTROLA</div>
+                <div style="font-size:0.85rem;font-weight:700;">ARES / VIES API</div>
+                <div style="font-size:0.7rem;color:var(--muted);margin-top:0.2rem;">Ověření platnosti IČ/DIČ</div>
+            </div>
+            <div style="text-align:center;color:var(--muted);font-weight:bold;">[+]</div>
+            <div style="background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:0.75rem;padding:1rem;text-align:center;">
+                <div style="font-size:0.7rem;font-weight:800;color:var(--green);margin-bottom:0.2rem;">ZÁPIS</div>
+                <div style="font-size:0.85rem;font-weight:700;">ERP / Pohoda API</div>
+                <div style="font-size:0.7rem;color:var(--muted);margin-top:0.2rem;">Příprava k zaúčtování</div>
+            </div>
+        </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div class="glass-panel" style="padding:1.75rem;border-radius:1.25rem;">
+            <h3 style="font-size:1rem;font-weight:700;margin:0 0 1rem;color:var(--cyan);">Parametry workflow v n8n</h3>
+            <div class="code-block">
+<span class="code-comment">// Node configuration for Document AI extraction</span>
+{
+  <span class="code-key">"node"</span>: <span class="code-val">"Vision_API_Extractor"</span>,
+  <span class="code-key">"parameters"</span>: {
+    <span class="code-key">"document"</span>: <span class="code-val">"={{ $binary.attachment }}"</span>,
+    <span class="code-key">"features"</span>: [
+      <span class="code-val">"RECEIPT_PARSER"</span>,
+      <span class="code-val">"INVOICE_PARSER"</span>
+    ]
+  },
+  <span class="code-key">"onError"</span>: <span class="code-val">"continueErrorOutput"</span>
+}
+            </div>
+            <p style="font-size:0.75rem;color:var(--muted);margin:1rem 0 0;">Ošetření chyb: V případě nízké konfidence (pod 90 %) je doklad odeslán na vyhrazený Slack kanál pro lidskou kontrolu.</p>
+        </div>
+        <div class="glass-panel" style="padding:1.75rem;border-radius:1.25rem;">
+            <h3 style="font-size:1rem;font-weight:700;margin:0 0 1rem;color:var(--green);">Hlavní přínosy nasazení</h3>
+            <table class="data-table">
+                <thead><tr><th>Metrika</th><th>Manuální stav</th><th>Po integraci</th></tr></thead>
+                <tbody>
+                    <tr><td>Zpracování 200 faktur</td><td style="color:#f87171;">480 minut</td><td style="color:var(--green);">5 minut</td></tr>
+                    <tr><td>Chybovost ve variabilním sym.</td><td style="color:#f87171;">4.5 %</td><td style="color:var(--green);">&lt; 0.1 %</td></tr>
+                    <tr><td>Zátěž při uzávěrce</td><td style="color:#f87171;">Vysoká (přesčasy)</td><td style="color:var(--green);">Nulová (plynulá)</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<section id="validace" style="padding:5rem 0;">
+    <div class="section-eyebrow" style="background:rgba(251,191,36,0.08);color:var(--amber);border:1px solid rgba(251,191,36,0.2);">
+        Sekce 03 — Validace Dat
+    </div>
+    <h2 style="font-size:2rem;font-weight:800;margin:0 0 0.5rem;">Křížová kontrola a transformace na strukturovaný formát</h2>
+    <p style="color:var(--muted);margin:0 0 3rem;max-width:600px;">Zamezení podvodům a chybám pomocí automatického ověřování naskenovaných údajů proti veřejným databázím.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem;">
+        <div class="glass-panel" style="padding:1.75rem;border-radius:1.25rem;">
+            <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.25rem;color:var(--amber);">Ověřovací procesní logika</h3>
+            <ul style="font-size:0.85rem;color:#cbd5e1;line-height:2;margin:0;padding-left:1.2rem;">
+                <li><strong>Kontrola ARES:</strong> Ověření, zda je fakturující subjekt aktivní a odpovídá mu uvedené IČ.</li>
+                <li><strong>Kontrola spolehlivosti plátce:</strong> Dotaz do registru plátců DPH, zda není bankovní účet označen jako nespolehlivý.</li>
+                <li><strong>Detekce duplicit:</strong> Ochrana proti dvojímu proplacení stejné faktury kontrolou interní databáze.</li>
+            </ul>
+        </div>
+        <div class="glass-panel" style="padding:1.75rem;border-radius:1.25rem;">
+            <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.25rem;color:var(--cyan);">Výstupní JSON struktura</h3>
+            <div class="code-block">
+{
+  <span class="code-key">"supplier"</span>: { 
+    <span class="code-key">"name"</span>: <span class="code-val">"TechCorp s.r.o."</span>, 
+    <span class="code-key">"vat_id"</span>: <span class="code-val">"CZ12345678"</span> 
+  },
+  <span class="code-key">"payment"</span>: { 
+    <span class="code-key">"iban"</span>: <span class="code-val">"CZ0000000000000012345678"</span>,
+    <span class="code-key">"var_symbol"</span>: <span class="code-val">"20260401"</span>
+  },
+  <span class="code-key">"totals"</span>: { 
+    <span class="code-key">"net_amount"</span>: <span class="code-val">25000.00</span>, 
+    <span class="code-key">"vat_amount"</span>: <span class="code-val">5250.00</span> 
+  },
+  <span class="code-key">"validation_status"</span>: <span class="code-val">"PASSED"</span>
+}
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<section id="roi" style="padding:5rem 0;">
+    <div class="section-eyebrow" style="background:rgba(74,222,128,0.08);color:var(--green);border:1px solid rgba(74,222,128,0.2);">
+        Sekce 04 — Ekonomika projektu
+    </div>
+    <h2 style="font-size:2rem;font-weight:800;margin:0 0 0.5rem;">Návratnost investice (ROI)</h2>
+    <p style="color:var(--muted);margin:0 0 3rem;max-width:600px;">Porovnání stávajících nákladů na rutinní datový vstup s investicí do nasazení a správy automatizačního balíčku.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div class="glass-panel" style="padding:1.75rem;border-radius:1.25rem;">
+            <h3 style="font-size:0.85rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin:0 0 1.25rem;text-align:center;">Kumulativní úspora hodin v čase</h3>
+            <div class="chart-container">
+                <canvas id="chartRoi"></canvas>
+            </div>
+        </div>
+        <div class="glass-panel" style="padding:1.75rem;border-radius:1.25rem;">
+            <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.25rem;color:var(--green);">Rozpad měsíční bilance</h3>
+            <table class="data-table">
+                <thead><tr><th>Položka</th><th>Náklad / Úspora</th><th>Bilance</th></tr></thead>
+                <tbody>
+                    <tr><td>Manuální přepis přijatých faktur</td><td style="color:#f87171;">- 28 000 Kč</td><td>Eliminováno</td></tr>
+                    <tr><td>Odstranění chyb a přesčasů</td><td style="color:#f87171;">- 19 500 Kč</td><td>Eliminováno</td></tr>
+                    <tr><td>Provoz VPS + licence systému</td><td style="color:var(--muted);">950 Kč</td><td>Fixní náklad</td></tr>
+                    <tr><td>Spotřeba API tokenů pro OCR</td><td style="color:var(--muted);">~ 1 550 Kč</td><td>Variabilní</td></tr>
+                    <tr><td><strong>Čistá úspora pro organizaci</strong></td><td style="color:var(--green);font-weight:800;">+ 45 000 Kč</td><td><strong>Měsíčně</strong></td></tr>
+                </tbody>
+            </table>
+            <div style="margin-top:1.5rem;padding:1rem;background:rgba(74,222,128,0.06);border-radius:0.75rem;border:1px solid rgba(74,222,128,0.2);">
+                <div style="font-size:0.75rem;color:var(--muted);">Bod zvratu investice (Payback period):</div>
+                <div style="font-size:1.4rem;font-weight:800;color:var(--green);margin-top:0.2rem;">&lt; 28 dnů provozu</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<section id="implementace" style="padding:5rem 0;">
+    <div class="section-eyebrow" style="background:rgba(244,114,182,0.08);color:var(--pink);border:1px solid rgba(244,114,182,0.2);">
+        Sekce 05 — Plán nasazení
+    </div>
+    <h2 style="font-size:2rem;font-weight:800;margin:0 0 0.5rem;">Harmonogram integrace do 14 dnů</h2>
+    <p style="color:var(--muted);margin:0 0 3rem;max-width:600px;">Nasaditelnost na klíč bez narušení stávajících finančních operací s využitím zkušebních testovacích dávek.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;">
+        <div class="glass-panel" style="padding:1.5rem;border-radius:1rem;">
+            <div style="font-size:0.7rem;font-weight:800;color:var(--cyan);">FÁZE 01 (DEN 1-3)</div>
+            <h4 style="font-size:1rem;font-weight:700;margin:0.4rem 0 0.5rem;">Zajištění infrastruktury</h4>
+            <p style="font-size:0.8rem;color:var(--muted);line-height:1.6;margin:0;">Zřízení dedikované schránky pro faktury, nasazení systému n8n a propojení testovacího prostředí s účetním API.</p>
+        </div>
+        <div class="glass-panel" style="padding:1.5rem;border-radius:1rem;border-color:var(--indigo);">
+            <div style="font-size:0.7rem;font-weight:800;color:var(--indigo);">FÁZE 02 (DEN 4-8)</div>
+            <h4 style="font-size:1rem;font-weight:700;margin:0.4rem 0 0.5rem;">Kalibrace OCR modelů</h4>
+            <p style="font-size:0.8rem;color:var(--muted);line-height:1.6;margin:0;">Zpracování historického vzorku 500 faktur pro naučení specifických formátů vašich hlavních dodavatelů.</p>
+        </div>
+        <div class="glass-panel" style="padding:1.5rem;border-radius:1rem;border-color:var(--amber);">
+            <div style="font-size:0.7rem;font-weight:800;color:var(--amber);">FÁZE 03 (DEN 9-11)</div>
+            <h4 style="font-size:1rem;font-weight:700;margin:0.4rem 0 0.5rem;">Stínový provoz</h4>
+            <p style="font-size:0.8rem;color:var(--muted);line-height:1.6;margin:0;">Porovnávání dat vytěžených umělou inteligencí s daty manuálně zadanými vašimi účetními k ověření nulové chybovosti.</p>
+        </div>
+        <div class="glass-panel" style="padding:1.5rem;border-radius:1rem;border-color:var(--green);">
+            <div style="font-size:0.7rem;font-weight:800;color:var(--green);">FÁZE 04 (DEN 12-14)</div>
+            <h4 style="font-size:1rem;font-weight:700;margin:0.4rem 0 0.5rem;">Ostré spuštění</h4>
+            <p style="font-size:0.8rem;color:var(--muted);line-height:1.6;margin:0;">Přepnutí zpracování dokumentů plně na AI. Předání postupů pro řešení nestandardních faktur v chybovém rozhraní.</p>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<section id="infrastruktura" style="padding:5rem 0;">
+    <div class="glass-panel" style="padding:2.5rem;border-radius:1.5rem;border-color:rgba(34,211,238,0.25);background:linear-gradient(135deg,rgba(34,211,238,0.05),rgba(129,140,248,0.05));">
+        <div style="max-width:800px;margin:0 auto;text-align:center;">
+            <div style="display:inline-block;padding:0.25rem 0.75rem;background:rgba(34,211,238,0.15);color:var(--cyan);font-size:0.7rem;font-weight:800;border-radius:999px;margin-bottom:1rem;">
+                GARANCE DIGITÁLNÍ SUVERENITY
+            </div>
+            <h3 style="font-size:1.75rem;font-weight:800;margin:0 0 1rem;">Citlivá finanční data v absolutním bezpečí</h3>
+            <p style="color:var(--muted);font-size:0.95rem;line-height:1.8;margin:0 0 2rem;">
+                Veškerá data jsou procesována lokálně na vaší vlastní instanci. Nástroje pro vytěžování dat nepoužívají zpracovávané dokumenty pro další trénink strojových modelů. Vaše účetnictví tak splňuje nejpřísnější bezpečnostní i legislativní požadavky na správu dokumentů.
+            </p>
+            <div style="display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;font-size:0.8rem;font-weight:600;">
+                <span style="color:var(--green);">[ OK ] Shoda s GDPR</span>
+                <span style="color:var(--cyan);">[ OK ] Žádný Cloud Lock-in</span>
+                <span style="color:var(--indigo);">[ OK ] Striktní Zero Retention</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+</main>
+
+<footer style="padding:3rem 1.5rem;border-top:1px solid rgba(255,255,255,0.04);text-align:center;color:#475569;font-size:0.75rem;">
+    <p style="margin:0 0 0.5rem;">AI SME Integrátor: Audit Report pro Účetnictví a finance. Vygenerováno na základě technologického auditu finanční správy.</p>
+    <p style="margin:0;">Dokument je určen výhradně pro interní potřeby zadavatele.</p>
+</footer>
+
+<script>
+    // Navigation active state tracker
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-pill');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => link.classList.remove('active'));
+                const activeLink = document.querySelector(`.nav-pill[href="#${entry.target.id}"]`);
+                if (activeLink) activeLink.classList.add('active');
+            }
+        });
+    }, { threshold: 0.35 });
+    
+    sections.forEach(section => observer.observe(section));
+
+    // Chart instantiation
+    window.addEventListener('load', () => {
+        const canvasRoi = document.getElementById('chartRoi');
+        if (canvasRoi) {
+            new Chart(canvasRoi, {
+                type: 'line',
+                data: {
+                    labels: ['Měsíc 1', 'Měsíc 2', 'Měsíc 3', 'Měsíc 4', 'Měsíc 5', 'Měsíc 6'],
+                    datasets: [{
+                        label: 'Ušetřené hodiny celkem',
+                        data: [75, 155, 235, 315, 395, 475],
+                        borderColor: '#22d3ee',
+                        backgroundColor: 'rgba(34, 211, 238, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', callback: val => val + ' h' } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: context => ` Celková úspora: ${context.raw} hodin`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

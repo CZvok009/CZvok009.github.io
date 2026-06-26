@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="cs" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Audit Report: Spedice a Logistika 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        :root {
+            --cyan: #22d3ee;
+            --indigo: #818cf8;
+            --pink: #f472b6;
+            --amber: #fbbf24;
+            --green: #4ade80;
+            --bg: #020617;
+            --surface: rgba(15, 23, 42, 0.6);
+            --border: rgba(34, 211, 238, 0.12);
+            --muted: #94a3b8;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: #f1f5f9;
+            margin: 0;
+        }
+
+        /* Sticky Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(2, 6, 23, 0.92);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            height: 56px;
+        }
+        .nav-inner::-webkit-scrollbar { display: none; }
+        .nav-pill {
+            white-space: nowrap;
+            padding: 0.35rem 0.9rem;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-decoration: none;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+            flex-shrink: 0;
+        }
+        .nav-pill:hover { color: #f1f5f9; border-color: var(--border); }
+        .nav-pill.active { color: var(--bg); background: var(--cyan); }
+
+        /* Section Eyebrow Labels */
+        .section-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            padding: 0.3rem 0.85rem;
+            border-radius: 999px;
+            margin-bottom: 1.25rem;
+        }
+
+        /* Glassmorphism Cards */
+        .glass-panel {
+            background: var(--surface);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 24px -1px rgba(0,0,0,0.2);
+        }
+        .card-hover {
+            transition: transform 0.25s, box-shadow 0.25s;
+        }
+        .card-hover:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px -4px rgba(0,0,0,0.35);
+        }
+
+        /* Step Cards with Left Accent */
+        .step-card {
+            border-left: 3px solid var(--cyan);
+            transition: all 0.25s;
+        }
+        .step-card:hover {
+            background: rgba(34, 211, 238, 0.04);
+            transform: translateX(6px);
+        }
+
+        /* Typography Gradients */
+        .gradient-text {
+            background: linear-gradient(135deg, var(--cyan) 0%, var(--indigo) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Chart Canvas Containers */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            margin: 0 auto;
+            height: 320px;
+        }
+
+        /* Structured Data Tables */
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+        .data-table th {
+            text-align: left;
+            padding: 0.6rem 1rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--muted);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .data-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: #cbd5e1;
+            vertical-align: top;
+        }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+        /* Status Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.18rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        /* Code Block Styling */
+        .code-block {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 0.75rem;
+            padding: 1rem 1.25rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #a5f3fc;
+            overflow-x: auto;
+            line-height: 1.7;
+        }
+        .code-comment { color: #475569; }
+        .code-key { color: var(--indigo); }
+        .code-val { color: var(--amber); }
+
+        /* Layout Dividers and Offsets */
+        section[id] { scroll-margin-top: 72px; }
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, var(--border), transparent);
+            margin: 0;
+        }
+        .hero-bg {
+            background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(34,211,238,0.08) 0%, transparent 70%);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+<!-- Main Navigation Bar -->
+<nav>
+    <div class="nav-inner">
+        <span style="font-size:0.72rem;font-weight:800;color:var(--cyan);margin-right:0.5rem;flex-shrink:0;">AUDIT REPORT</span>
+        <a href="#souhrn" class="nav-pill">01 Shrnutí</a>
+        <a href="#pipeline" class="nav-pill">02 Dispečink</a>
+        <a href="#parser" class="nav-pill">03 Email Parser</a>
+        <a href="#roi" class="nav-pill">04 Finanční ROI</a>
+        <a href="#implementace" class="nav-pill">05 Implementace</a>
+        <a href="#infrastruktura" class="nav-pill">06 Bezpečnost</a>
+    </div>
+</nav>
+
+<!-- Hero Header Section -->
+<header class="hero-bg pt-20 pb-16 px-6">
+    <div style="max-width:960px;margin:0 auto;text-align:center;">
+        <div style="display:inline-block;padding:0.3rem 1rem;border-radius:999px;background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.2);color:var(--cyan);font-size:0.75rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:1.5rem;">
+            Segment: Spedice a Logistika SME
+        </div>
+        <h1 style="font-size:clamp(2.5rem,6vw,4.2rem);font-weight:800;line-height:1.1;margin:0 0 1.25rem;">
+            AI Procesní Audit:<br><span class="gradient-text">Automatizace vytěžování přeprav</span>
+        </h1>
+        <p style="color:var(--muted);font-size:1.1rem;max-width:640px;margin:0 auto 2.5rem;line-height:1.7;">
+            Identifikovali jsme kritické úzké hrdlo dispečinku: ruční přepisování poptávek z e-mailů do podnikového ERP[cite: 1]. Níže naleznete návrh plně automatizovaného toku dat.
+        </p>
+        <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;">
+            <div class="glass-panel" style="padding:1rem 1.5rem;border-radius:1rem;text-align:center;min-width:160px;">
+                <div style="font-size:1.8rem;font-weight:800;color:var(--cyan);">75 hod</div>
+                <div style="font-size:0.75rem;color:var(--muted);">Měsíční úspora času</div>
+            </div>
+            <div class="glass-panel" style="padding:1rem 1.5rem;border-radius:1rem;text-align:center;min-width:160px;">
+                <div style="font-size:1.8rem;font-weight:800;color:var(--green);">38 000 Kč</div>
+                <div style="font-size:0.75rem;color:var(--muted);">Odhadovaná úspora / měsíc</div>
+            </div>
+            <div class="glass-panel" style="padding:1rem 1.5rem;border-radius:1rem;text-align:center;min-width:160px;">
+                <div style="font-size:1.8rem;font-weight:800;color:var(--indigo);">14 dnů</div>
+                <div style="font-size:0.75rem;color:var(--muted);">Nasaditelnost do provozu</div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="section-divider"></div>
+
+<!-- Main Content Wrapper -->
+<main style="max-width:1200px;margin:0 auto;padding:0 1.5rem;">
+
+<!-- Section 1: Executive Summary -->
+<section id="souhrn" style="padding:5rem 0;">
+    <div class="section-eyebrow" style="background:rgba(34,211,238,0.08);color:var(--cyan);border:1px solid rgba(34,211,238,0.2);">
+        Sekce 01 — Diagnostika agendy
+    </div>
+    <h2 style="font-size:2rem;font-weight:800;margin:0 0 0.5rem;">Identifikovaná úzká hrdla provozu</h2>
+    <p style="color:var(--muted);margin:0 0 3rem;max-width:600px;">Při analýze dispečerských procesů byly nalezeny body s nejvyšší rutinní zátěží, které zpomalují reakci na tržní nabídky a způsobují chybovost v objednávkách.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.25rem;">
+        <div class="glass-panel card-hover step-card" style="padding:1.75rem;border-radius:0 1.25rem 1.25rem 0;">
+            <div style="font-size:0.75rem;font-weight:800;color:var(--cyan);margin-bottom:0.5rem;">PROBLÉM 01</div>
+            <h4 style="font-size:1.2rem;font-weight:700;margin:0 0 0.75rem;">Manuální přepis poptávek</h4>
+            <p style="font-size:0.85rem;color:var(--muted);line-height:1.6;margin:0;">Dispečer tráví průměrně 3 hodiny denně čtením nestrukturovaných e-mailů a přepisováním lokací, rozměrů a vah do systému Helios nebo Pohoda[cite: 1].</p>
+        </div>
+        <div class="glass-panel card-hover step-card" style="padding:1.75rem;border-radius:0 1.25rem 1.25rem 0;border-color:var(--amber);">
+            <div style="font-size:0.75rem;font-weight:800;color:var(--amber);margin-bottom:0.5rem;">PROBLÉM 02</div>
+            <h4 style="font-size:1.2rem;font-weight:700;margin:0 0 0.75rem;">Zpožděná kalkulace tras</h4>
+            <p style="font-size:0.85rem;color:var(--muted);line-height:1.6;margin:0;">Ověřování přejezdových vzdáleností a dostupných vozidel probíhá odděleně v externích mapových aplikacích, což prodlužuje vystavení cenové nabídky.</p>
+        </div>
+        <div class="glass-panel card-hover step-card" style="padding:1.75rem;border-radius:0 1.25rem 1.25rem 0;border-color:var(--pink);">
+            <div style="font-size:0.75rem;font-weight:800;color:var(--pink);margin-bottom:0.5rem;">PROBLÉM 03</div>
+            <h4 style="font-size:1.2rem;font-weight:700;margin:0 0 0.75rem;">Asynchronní komunikace</h4>
+            <p style="font-size:0.85rem;color:var(--muted);line-height:1.6;margin:0;">Ridiči informují o nakládce telefonicky nebo přes SMS. Podpora následně ručně aktualizuje tabulky pro koncové zákazníky.</p>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Section 2: Dispatch Pipeline Architecture -->
+<section id="pipeline" style="padding:5rem 0;">
+    <div class="section-eyebrow" style="background:rgba(129,140,248,0.08);color:var(--indigo);border:1px solid rgba(129,140,248,0.2);">
+        Sekce 02 — Architektura dispečinku
+    </div>
+    <h2 style="font-size:2rem;font-weight:800;margin:0 0 0.5rem;">Automatizovaný tok od poptávky po nakládku</h2>
+    <p style="color:var(--muted);margin:0 0 3rem;max-width:600px;">Návrh logického toku v prostředí self-hosted n8n instance. Poptávka z e-mailu je zpracována a zařazena do ERP za méně než 5 sekund[cite: 1].</p>
+
+    <!-- Pipeline Diagram -->
+    <div class="glass-panel" style="padding:2rem;border-radius:1.25rem;margin-bottom:2rem;">
+        <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.5rem;color:var(--indigo);">Tok dat: E-mail až schválení dispečerem</h3>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.75rem;align-items:center;">
+            <div style="background:rgba(129,140,248,0.08);border:1px solid rgba(129,140,248,0.2);border-radius:0.75rem;padding:1rem;text-align:center;">
+                <div style="font-size:0.7rem;font-weight:800;color:var(--indigo);margin-bottom:0.2rem;">TRIGGER</div>
+                <div style="font-size:0.85rem;font-weight:700;">IMAP E-mail Listener</div>
+                <div style="font-size:0.7rem;color:var(--muted);margin-top:0.2rem;">Příjem nové zprávy</div>
+            </div>
+            <div style="text-align:center;color:var(--muted);font-weight:bold;">+</div>
+            <div style="background:rgba(34,211,238,0.08);border:1px solid rgba(34,211,238,0.2);border-radius:0.75rem;padding:1rem;text-align:center;">
+                <div style="font-size:0.7rem;font-weight:800;color:var(--cyan);margin-bottom:0.2rem;">EXTRAKCE</div>
+                <div style="font-size:0.85rem;font-weight:700;">LLM Parser</div>
+                <div style="font-size:0.7rem;color:var(--muted);margin-top:0.2rem;">Převod textu na JSON</div>
+            </div>
+            <div style="text-align:center;color:var(--muted);font-weight:bold;">+</div>
+            <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.2);border-radius:0.75rem;padding:1rem;text-align:center;">
+                <div style="font-size:0.7rem;font-weight:800;color:var(--amber);margin-bottom:0.2rem;">ENRICHMENT</div>
+                <div style="font-size:0.85rem;font-weight:700;">Google Maps API</div>
+                <div style="font-size:0.7rem;color:var(--muted);margin-top:0.2rem;">Výpočet km a času tras</div>
+            </div>
+            <div style="text-align:center;color:var(--muted);font-weight:bold;">+</div>
+            <div style="background:rgba(74,222,128,0.08);border:1px solid rgba(74,222,128,0.2);border-radius:0.75rem;padding:1rem;text-align:center;">
+                <div style="font-size:0.7rem;font-weight:800;color:var(--green);margin-bottom:0.2rem;">SCHVÁLENÍ</div>
+                <div style="font-size:0.85rem;font-weight:700;">Slack Alert &amp; ERP</div>
+                <div style="font-size:0.7rem;color:var(--muted);margin-top:0.2rem;">Zápis do Helios / Pohoda</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technical Implementation Block -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div class="glass-panel" style="padding:1.75rem;border-radius:1.25rem;">
+            <h3 style="font-size:1rem;font-weight:700;margin:0 0 1rem;color:var(--cyan);">Parametry workflow v n8n</h3>
+            <div class="code-block">
+<span class="code-comment">// Node configuration for shipment dispatch entry</span>
+{
+  <span class="code-key">"node"</span>: <span class="code-val">"ERP_Freight_Insert"</span>,
+  <span class="code-key">"parameters"</span>: {
+    <span class="code-key">"loadingCity"</span>: <span class="code-val">"={{ $json.origin.city }}"</span>,
+    <span class="code-key">"deliveryCity"</span>: <span class="code-val">"={{ $json.destination.city }}"</span>,
+    <span class="code-key">"cargoWeightKg"</span>: <span class="code-val">"={{ $json.cargo.weight }}"</span>,
+    <span class="code-key">"estimatedDistanceKm"</span>: <span class="code-val">"={{ $json.route.km }}"</span>
+  },
+  <span class="code-key">"onError"</span>: <span class="code-val">"continueErrorOutput"</span>
+}
+            </div>
+            <p style="font-size:0.75rem;color:var(--muted);margin:1rem 0 0;">Ošetření chyb: Chybějící PSČ nebo neúplná adresa odesílatele vyvolá požadavek na ruční doplnění přímo v kanálu Slack.</p>
+        </div>
+        <div class="glass-panel" style="padding:1.75rem;border-radius:1.25rem;">
+            <h3 style="font-size:1rem;font-weight:700;margin:0 0 1rem;color:var(--green);">Hlavní přínosy nasazení</h3>
+            <table class="data-table">
+                <thead><tr><th>Metrika</th><th>Manuální stav</th><th>Po integraci</th></tr></thead>
+                <tbody>
+                    <tr><td>Zpracování 50 poptávek</td><td style="color:#f87171;">150 minut</td><td style="color:var(--green);">2 minuty</td></tr>
+                    <tr><td>Chybovost zadání vah a m3</td><td style="color:#f87171;">5.8 %</td><td style="color:var(--green);">0.0 %</td></tr>
+                    <tr><td>Rychlost odeslání nabídky</td><td style="color:#f87171;">&gt; 90 minut</td><td style="color:var(--green);">&lt; 3 minuty</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Section 3: Email Parser Engine -->
+<section id="parser" style="padding:5rem 0;">
+    <div class="section-eyebrow" style="background:rgba(251,191,36,0.08);color:var(--amber);border:1px solid rgba(251,191,36,0.2);">
+        Sekce 03 — Email Parser Engine
+    </div>
+    <h2 style="font-size:2rem;font-weight:800;margin:0 0 0.5rem;">Transformace volného textu na strukturovaná data</h2>
+    <p style="color:var(--muted);margin:0 0 3rem;max-width:600px;">AI model eliminuje lidské chyby při přepisování specifikací nákladu z cizojazyčných a nestrukturovaných e-mailů[cite: 1].</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem;">
+        <div class="glass-panel" style="padding:1.75rem;border-radius:1.25rem;">
+            <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.25rem;color:var(--amber);">Vstup: Surový e-mail zákazníka (Text)</h3>
+            <div class="code-block">
+<span class="code-comment">// Unstructured email body</span>
+Dobrý den, potřebujeme odvézt 3 palety
+z Brna (CTPark) do Hamburku. Celková váha
+je cca 1450 kg. Nakládka možná zítra ráno od 8:00.
+Prosím o rychlou kalkulaci ceny.
+            </div>
+            <p style="font-size:0.78rem;color:var(--muted);margin-top:1rem;">Uzel n8n monitoruje určenou schránku dispečinku přes bezpečný IMAP protokol.</p>
+        </div>
+        <div class="glass-panel" style="padding:1.75rem;border-radius:1.25rem;">
+            <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.25rem;color:var(--cyan);">Výstup: Validovaný JSON pro ERP</h3>
+            <div class="code-block">
+{
+  <span class="code-key">"origin"</span>: { <span class="code-key">"city"</span>: <span class="code-val">"Brno"</span>, <span class="code-key">"note"</span>: <span class="code-val">"CTPark"</span> },
+  <span class="code-key">"destination"</span>: { <span class="code-key">"city"</span>: <span class="code-val">"Hamburg"</span> },
+  <span class="code-key">"cargo"</span>: { <span class="code-key">"pallets"</span>: <span class="code-val">3</span>, <span class="code-key">"weightKg"</span>: <span class="code-val">1450</span> },
+  <span class="code-key">"loadingDate"</span>: <span class="code-val">"2026-06-27T08:00:00"</span>
+}
+            </div>
+            <p style="font-size:0.78rem;color:var(--muted);margin-top:1rem;">Přímý zápis do databáze dispečerského softwaru a vytvoření návrhu v systému.</p>
+        </div>
+    </div>
+
+    <!-- Quality Assurance Rules -->
+    <div class="glass-panel" style="padding:1.75rem;border-radius:1.25rem;">
+        <h3 style="font-size:1rem;font-weight:700;margin:0 0 1rem;color:var(--pink);">Pravidla parsování v Promptu</h3>
+        <ul style="font-size:0.85rem;color:#cbd5e1;line-height:2;margin:0;padding-left:1.2rem;">
+            <li><strong>Přepočet jednotek:</strong> Model automaticky konvertuje britské libry (lbs) na kilogramy a paletová místa na ložné metry (LDM).</li>
+            <li><strong>Detekce chybějících dat:</strong> Pokud v e-mailu chybí hmotnost nebo rozměr, pole je označeno hodnotou null pro ruční doptání.</li>
+            <li><strong>Multijazyčnost:</strong> Engine zpracovává zprávy v češtině, němčině, angličtině a polštině se stejnou přesností.</li>
+        </ul>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Section 4: Financial ROI -->
+<section id="roi" style="padding:5rem 0;">
+    <div class="section-eyebrow" style="background:rgba(74,222,128,0.08);color:var(--green);border:1px solid rgba(74,222,128,0.2);">
+        Sekce 04 — Ekonomika projektu
+    </div>
+    <h2 style="font-size:2rem;font-weight:800;margin:0 0 0.5rem;">Návratnost investice (ROI)</h2>
+    <p style="color:var(--muted);margin:0 0 3rem;max-width:600px;">Porovnání stávajících mzdových nákladů na administrativu s investicí do nasazení a správy lokálního automatizačního balíčku.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+        <div class="glass-panel" style="padding:1.75rem;border-radius:1.25rem;">
+            <h3 style="font-size:0.85rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin:0 0 1.25rem;text-align:center;">Kumulativní úspora hodin v čase</h3>
+            <div class="chart-container">
+                <canvas id="chartRoi"></canvas>
+            </div>
+        </div>
+        <div class="glass-panel" style="padding:1.75rem;border-radius:1.25rem;">
+            <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.25rem;color:var(--green);">Rozpad měsíční bilance</h3>
+            <table class="data-table">
+                <thead><tr><th>Položka</th><th>Náklad / Úspora</th><th>Bilance</th></tr></thead>
+                <tbody>
+                    <tr><td>Ruční přepisování poptávek do ERP[cite: 1]</td><td style="color:#f87171;">- 22 500 Kč</td><td>Eliminováno</td></tr>
+                    <tr><td>Manuální ověřování tras a mýta</td><td style="color:#f87171;">- 16 800 Kč</td><td>Nahrazeno API</td></tr>
+                    <tr><td>Provoz VPS + n8n self-hosted režim</td><td style="color:var(--muted);">450 Kč</td><td>Fixní náklad</td></tr>
+                    <tr><td>Spotřeba LLM API tokenů</td><td style="color:var(--muted);">~ 850 Kč</td><td>Variabilní</td></tr>
+                    <tr><td><strong>Čistá úspora pro spediční firmu</strong></td><td style="color:var(--green);font-weight:800;">+ 38 000 Kč</td><td><strong>Měsíčně</strong></td></tr>
+                </tbody>
+            </table>
+            <div style="margin-top:1.5rem;padding:1rem;background:rgba(74,222,128,0.06);border-radius:0.75rem;border:1px solid rgba(74,222,128,0.2);">
+                <div style="font-size:0.75rem;color:var(--muted);">Bod zvratu investice (Payback period):</div>
+                <div style="font-size:1.4rem;font-weight:800;color:var(--green);margin-top:0.2rem;">&lt; 30 dnů provozu</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Section 5: Implementation Timeline -->
+<section id="implementace" style="padding:5rem 0;">
+    <div class="section-eyebrow" style="background:rgba(244,114,182,0.08);color:var(--pink);border:1px solid rgba(244,114,182,0.2);">
+        Sekce 05 — Plán nasazení
+    </div>
+    <h2 style="font-size:2rem;font-weight:800;margin:0 0 0.5rem;">Harmonogram integrace do 14 dnů</h2>
+    <p style="color:var(--muted);margin:0 0 3rem;max-width:600px;">Implementace probíhá plně na pozadí. K ostrému nasazení na dispečinku dojde až po ověření bezchybnosti v testovacím režimu.</p>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;">
+        <div class="glass-panel" style="padding:1.5rem;border-radius:1rem;">
+            <div style="font-size:0.7rem;font-weight:800;color:var(--cyan);">FÁZE 01 (DEN 1-3)</div>
+            <h4 style="font-size:1rem;font-weight:700;margin:0.4rem 0 0.5rem;">Instalace n8n</h4>
+            <p style="font-size:0.8rem;color:var(--muted);line-height:1.6;margin:0;">Nasazení Docker kontejneru na váš linuxový server, nastavení VPN přístupu a bezpečné propojení s databází Helios / Pohoda.</p>
+        </div>
+        <div class="glass-panel" style="padding:1.5rem;border-radius:1rem;border-color:var(--indigo);">
+            <div style="font-size:0.7rem;font-weight:800;color:var(--indigo);">FÁZE 02 (DEN 4-8)</div>
+            <h4 style="font-size:1rem;font-weight:700;margin:0.4rem 0 0.5rem;">Sestavení parseru</h4>
+            <p style="font-size:0.8rem;color:var(--muted);line-height:1.6;margin:0;">Napojení IMAP schránky, naprogramování extrakčních pravidel v promptu a kalibrace výpočtu přejezdových vzdáleností.</p>
+        </div>
+        <div class="glass-panel" style="padding:1.5rem;border-radius:1rem;border-color:var(--amber);">
+            <div style="font-size:0.7rem;font-weight:800;color:var(--amber);">FÁZE 03 (DEN 9-11)</div>
+            <h4 style="font-size:1rem;font-weight:700;margin:0.4rem 0 0.5rem;">Stínový provoz</h4>
+            <p style="font-size:0.8rem;color:var(--muted);line-height:1.6;margin:0;">Systém vytěžuje příchozí e-maily paralelně s dispečery. Vyhodnocujeme přesnost rozpoznaných lokací a rozměrů palet.</p>
+        </div>
+        <div class="glass-panel" style="padding:1.5rem;border-radius:1rem;border-color:var(--green);">
+            <div style="font-size:0.7rem;font-weight:800;color:var(--green);">FÁZE 04 (DEN 12-14)</div>
+            <h4 style="font-size:1rem;font-weight:700;margin:0.4rem 0 0.5rem;">Ostré spuštění</h4>
+            <p style="font-size:0.8rem;color:var(--muted);line-height:1.6;margin:0;">Přepnutí do produkčního režimu. Zaškolení dispečerů pro obsluhu Slack notifikací a předání kompletní dokumentace kódu.</p>
+        </div>
+    </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- Section 6: Security and Data Sovereignty -->
+<section id="infrastruktura" style="padding:5rem 0;">
+    <div class="glass-panel" style="padding:2.5rem;border-radius:1.5rem;border-color:rgba(34,211,238,0.25);background:linear-gradient(135deg,rgba(34,211,238,0.05),rgba(129,140,248,0.05));">
+        <div style="max-width:800px;margin:0 auto;text-align:center;">
+            <div style="display:inline-block;padding:0.25rem 0.75rem;background:rgba(34,211,238,0.15);color:var(--cyan);font-size:0.7rem;font-weight:800;border-radius:999px;margin-bottom:1rem;">
+                GARANCE DIGITÁLNÍ SUVERENITY
+            </div>
+            <h3 style="font-size:1.75rem;font-weight:800;margin:0 0 1rem;">Citlivé cenové nabídky neopouští váš server</h3>
+            <p style="color:var(--muted);font-size:0.95rem;line-height:1.8;margin:0 0 2rem;">
+                Veškerá běhová logika operuje na vaší vlastní n8n instanci v izolované síti. Databáze klientů, sjednané sazby ani vytížení kamionů nejsou sdíleny s žádnou SaaS platformou. Volání AI modelů probíhá striktně anonymizovaně bez trénovacích doložek.
+            </p>
+            <div style="display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;font-size:0.8rem;font-weight:600;">
+                <span style="color:var(--green);">[OK] Plný soulad s GDPR</span>
+                <span style="color:var(--cyan);">[OK] Nulový Vendor Lock-in</span>
+                <span style="color:var(--indigo);">[OK] Izolované logy eventů</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+</main>
+
+<!-- Document Footer -->
+<footer style="padding:3rem 1.5rem;border-top:1px solid rgba(255,255,255,0.04);text-align:center;color:#475569;font-size:0.75rem;">
+    <p style="margin:0 0 0.5rem;">AI SME Integrátor: Audit Report pro Spediční segment. Vygenerováno na základě procesního auditu dispečinku.</p>
+    <p style="margin:0;">Dokument je určen výhradně pro interní potřeby zadavatele.</p>
+</footer>
+
+<script>
+    // Highlight active navigation link on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-pill');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => link.classList.remove('active'));
+                const activeLink = document.querySelector(`.nav-pill[href="#${entry.target.id}"]`);
+                if (activeLink) activeLink.classList.add('active');
+            }
+        });
+    }, { threshold: 0.35 });
+    
+    sections.forEach(section => observer.observe(section));
+
+    // Initialize document charts
+    window.addEventListener('load', () => {
+        const canvasRoi = document.getElementById('chartRoi');
+        if (canvasRoi) {
+            new Chart(canvasRoi, {
+                type: 'line',
+                data: {
+                    labels: ['Měsíc 1', 'Měsíc 2', 'Měsíc 3', 'Měsíc 4', 'Měsíc 5', 'Měsíc 6'],
+                    datasets: [{
+                        label: 'Ušetřené hodiny celkem',
+                        data: [60, 135, 210, 285, 360, 435],
+                        borderColor: '#22d3ee',
+                        backgroundColor: 'rgba(34, 211, 238, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    scales: {
+                        x: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8' } },
+                        y: { grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', callback: val => val + ' h' } }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: context => ` Celková úspora: ${context.raw} hodin`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>
