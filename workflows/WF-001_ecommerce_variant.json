@@ -5,7 +5,7 @@
       "parameters": {
         "httpMethod": "POST",
         "path": "wf-001-ecommerce",
-        "responseMode": "lastNode",
+        "responseMode": "onReceived",
         "options": {}
       },
       "id": "wf001e-webhook",
@@ -62,7 +62,7 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "// WF-001 Validation Gate (E-commerce)\n\nconst rawOutput = $input.item.json.text;\nlet extractedData;\nlet isValid = true;\nlet errorMessages = [];\n\ntry {\n  extractedData = typeof rawOutput === 'string'\n    ? JSON.parse(rawOutput)\n    : rawOutput;\n} catch (error) {\n  return [{\n    json: {\n      status: \"error\",\n      errors: [\"Failed to parse LLM output as JSON\"],\n      rawData: rawOutput\n    }\n  }];\n}\n\nconst requiredFields = ['customerName', 'productSku', 'quantity'];\n\nfor (const field of requiredFields) {\n  if (\n    !extractedData.hasOwnProperty(field) ||\n    extractedData[field] === null ||\n    extractedData[field] === \"\"\n  ) {\n    isValid = false;\n    errorMessages.push(`Missing critical field: ${field}`);\n  }\n}\n\nif (isValid) {\n  return [{\n    json: {\n      status: \"success\",\n      data: extractedData\n    }\n  }];\n} else {\n  return [{\n    json: {\n      status: \"error\",\n      errors: errorMessages,\n      partialData: extractedData\n    }\n  }];\n}"
+        "jsCode": "// WF-001 Validation Gate — universal\n// Change requiredFields per variant\n\nconst rawOutput = $input.item.json.text ?? $input.item.json.output;\nlet extractedData;\nlet isValid = true;\nlet errorMessages = [];\n\ntry {\n  extractedData = typeof rawOutput === 'string'\n    ? JSON.parse(rawOutput)\n    : rawOutput;\n} catch (error) {\n  return [{\n    json: {\n      status: \"error\",\n      errors: [\"Failed to parse LLM output as JSON\"],\n      rawData: rawOutput\n    }\n  }];\n}\n\nconst requiredFields = ['customerName', 'productSku', 'quantity'];\n\nfor (const field of requiredFields) {\n  if (\n    !extractedData.hasOwnProperty(field) ||\n    extractedData[field] === null ||\n    extractedData[field] === \"\"\n  ) {\n    isValid = false;\n    errorMessages.push(`Missing critical field: ${field}`);\n  }\n}\n\nif (isValid) {\n  return [{ json: { status: \"success\", data: extractedData } }];\n} else {\n  return [{ json: { status: \"error\", errors: errorMessages, partialData: extractedData } }];\n}"
       },
       "id": "wf001e-validation",
       "name": "Validation Gate",

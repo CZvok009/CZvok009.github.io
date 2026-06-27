@@ -1,0 +1,317 @@
+{
+  "name": "WF-001-ACCOUNTING: Účetnictví a faktury",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wf-001-accounting",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "wf001a-webhook",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 300],
+      "webhookId": "wf-001-accounting"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {
+          "temperature": 0
+        }
+      },
+      "id": "wf001a-openai-model",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [300, 520],
+      "credentials": {
+        "openAiApi": {
+          "id": "CONFIGURE_ME",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "SystemMessagePromptTemplate",
+              "message": "You are an expert invoice data extraction parser operating in a strict automated pipeline.\nYour task is to extract structured financial information from invoice text or OCR output.\nYou must return ONLY a valid JSON object. Do not include markdown formatting, explanations, or any other text.\n\nRequired JSON structure:\n{\n  \"supplier\": \"string or null\",\n  \"vat_id\": \"string or null\",\n  \"iban\": \"string or null\",\n  \"var_symbol\": \"string or null\",\n  \"net_amount\": \"number or null\",\n  \"vat_amount\": \"number or null\",\n  \"total_amount\": \"number or null\",\n  \"due_date\": \"string (ISO 8601 date) or null\",\n  \"validation_status\": \"ok|missing_fields|suspicious or null\"\n}\n\nExtraction rules:\n1. If a value is not explicitly mentioned, set it to null.\n2. vat_id: extract Czech IČO or DIČ (format CZ + 8-10 digits).\n3. iban: extract full IBAN if present, otherwise null.\n4. All amounts: output as numbers without currency symbols.\n5. due_date: always ISO 8601 (YYYY-MM-DD).\n6. validation_status: set to \"suspicious\" if total_amount differs from net_amount + vat_amount by more than 1 CZK."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "wf001a-llm",
+      "name": "LLM Extract",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [300, 300]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// WF-001 Validation Gate — universal\n// Change requiredFields per variant\n\nconst rawOutput = $input.item.json.text ?? $input.item.json.output;\nlet extractedData;\nlet isValid = true;\nlet errorMessages = [];\n\ntry {\n  extractedData = typeof rawOutput === 'string'\n    ? JSON.parse(rawOutput)\n    : rawOutput;\n} catch (error) {\n  return [{\n    json: {\n      status: \"error\",\n      errors: [\"Failed to parse LLM output as JSON\"],\n      rawData: rawOutput\n    }\n  }];\n}\n\nconst requiredFields = ['supplier', 'net_amount', 'total_amount', 'due_date'];\n\nfor (const field of requiredFields) {\n  if (\n    !extractedData.hasOwnProperty(field) ||\n    extractedData[field] === null ||\n    extractedData[field] === \"\"\n  ) {\n    isValid = false;\n    errorMessages.push(`Missing critical field: ${field}`);\n  }\n}\n\nif (isValid) {\n  return [{ json: { status: \"success\", data: extractedData } }];\n} else {\n  return [{ json: { status: \"error\", errors: errorMessages, partialData: extractedData } }];\n}"
+      },
+      "id": "wf001a-validation",
+      "name": "Validation Gate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "wf001a-cond-success",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "success",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "success"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "wf001a-cond-error",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "error",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "error"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf001a-switch",
+      "name": "Route by Status",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "wf001a-cond-suspicious",
+                    "leftValue": "={{ $json.data.validation_status }}",
+                    "rightValue": "suspicious",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "suspicious"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "wf001a-switch-validation",
+      "name": "Route by Validation Status",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [1140, 180]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "CONFIGURE_ME",
+          "cachedResultName": "Faktury"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Sheet1",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Datum přijetí": "={{ $now.toISO() }}",
+            "Dodavatel": "={{ $json.data.supplier }}",
+            "DIČ": "={{ $json.data.vat_id }}",
+            "IBAN": "={{ $json.data.iban }}",
+            "VS": "={{ $json.data.var_symbol }}",
+            "Bez DPH (Kč)": "={{ $json.data.net_amount }}",
+            "DPH (Kč)": "={{ $json.data.vat_amount }}",
+            "Celkem (Kč)": "={{ $json.data.total_amount }}",
+            "Splatnost": "={{ $json.data.due_date }}",
+            "Status": "={{ $json.data.validation_status }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "Datum přijetí", "displayName": "Datum přijetí", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Dodavatel", "displayName": "Dodavatel", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "DIČ", "displayName": "DIČ", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "IBAN", "displayName": "IBAN", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "VS", "displayName": "VS", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Bez DPH (Kč)", "displayName": "Bez DPH (Kč)", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "DPH (Kč)", "displayName": "DPH (Kč)", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Celkem (Kč)", "displayName": "Celkem (Kč)", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Splatnost", "displayName": "Splatnost", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Status", "displayName": "Status", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf001a-sheets",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1380, 120],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "CONFIGURE_ME",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "CONFIGURE_ME",
+          "cachedResultName": "#ucetnictvi-alerts"
+        },
+        "text": "=⚠️ *WF-001: Neúplná poptávka*\n\nByla přijata poptávka, ale chybí kritická data:\n{{ $json.errors.join('\\n• ') }}\n\nČástečná data:\n{{ JSON.stringify($json.partialData, null, 2) }}\n\n👉 Zkontrolujte prosím ručně a doplňte.",
+        "otherOptions": {}
+      },
+      "id": "wf001a-slack",
+      "name": "Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [1200, 420],
+      "credentials": {
+        "slackApi": {
+          "id": "CONFIGURE_ME",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "CONFIGURE_ME",
+          "cachedResultName": "#ucetnictvi-review"
+        },
+        "text": "=⚠️ *Faktura s nesouhlasícími částkami*\nDodavatel: {{ $json.data.supplier }}\nRozdíl: {{ $json.data.net_amount + $json.data.vat_amount - $json.data.total_amount }} Kč\n→ Zkontrolujte před zaúčtováním.",
+        "otherOptions": {}
+      },
+      "id": "wf001a-slack-suspicious",
+      "name": "Slack Suspicious Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [1380, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "CONFIGURE_ME",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{ "node": "LLM Extract", "type": "main", "index": 0 }]]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [[{ "node": "LLM Extract", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "LLM Extract": {
+      "main": [[{ "node": "Validation Gate", "type": "main", "index": 0 }]]
+    },
+    "Validation Gate": {
+      "main": [[{ "node": "Route by Status", "type": "main", "index": 0 }]]
+    },
+    "Route by Status": {
+      "main": [
+        [{ "node": "Route by Validation Status", "type": "main", "index": 0 }],
+        [{ "node": "Slack Alert", "type": "main", "index": 0 }]
+      ]
+    },
+    "Route by Validation Status": {
+      "main": [
+        [{ "node": "Slack Suspicious Alert", "type": "main", "index": 0 }],
+        [{ "node": "Google Sheets", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "wf001a-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "wf001a-ai-sme-integrator"
+  },
+  "tags": [{ "name": "WF-001" }, { "name": "Accounting" }]
+}

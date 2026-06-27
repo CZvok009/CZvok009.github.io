@@ -1,19 +1,19 @@
 {
-  "name": "WF-001: Inteligentní extraktor nestrukturovaných dat",
+  "name": "WF-001-LOGISTICS: Spedice (rozšířená)",
   "nodes": [
     {
       "parameters": {
         "httpMethod": "POST",
-        "path": "wf-001-extract",
+        "path": "wf-001-logistics",
         "responseMode": "onReceived",
         "options": {}
       },
-      "id": "wf001-webhook",
+      "id": "wf001l-webhook",
       "name": "Webhook Trigger",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
       "position": [0, 300],
-      "webhookId": "wf-001-extract"
+      "webhookId": "wf-001-logistics"
     },
     {
       "parameters": {
@@ -27,7 +27,7 @@
           "temperature": 0
         }
       },
-      "id": "wf001-openai-model",
+      "id": "wf001l-openai-model",
       "name": "OpenAI Chat Model",
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
@@ -47,13 +47,13 @@
           "messageValues": [
             {
               "type": "SystemMessagePromptTemplate",
-              "message": "You are an expert data extraction parser operating in a strict automated pipeline.\nYour task is to extract structured information from the provided unstructured user text.\nYou must return ONLY a valid JSON object. Do not include markdown formatting, explanations, or any other text.\n\nRequired JSON structure:\n{\n  \"originCity\": \"string or null\",\n  \"destinationCity\": \"string or null\",\n  \"weightKg\": \"number or null\",\n  \"isUrgent\": \"boolean\"\n}\n\nExtraction rules:\n1. If a specific value is not explicitly mentioned in the text, you must set its value to null.\n2. Convert all weight units to kilograms (Kg) automatically.\n3. If the text contains words implying fast processing (e.g., ASAP, urgent, dnes, urgentně), set \"isUrgent\" to true."
+              "message": "You are an expert logistics data extraction parser operating in a strict automated pipeline.\nYour task is to extract structured shipment information from unstructured emails or text messages.\nYou must return ONLY a valid JSON object. Do not include markdown formatting, explanations, or any other text.\n\nRequired JSON structure:\n{\n  \"loadingCity\": \"string or null\",\n  \"deliveryCity\": \"string or null\",\n  \"cargoWeightKg\": \"number or null\",\n  \"pallets\": \"number or null\",\n  \"loadingDate\": \"string (ISO 8601 date) or null\",\n  \"estimatedDistanceKm\": \"number or null\",\n  \"isUrgent\": \"boolean\",\n  \"note\": \"string or null\"\n}\n\nExtraction rules:\n1. If a value is not explicitly mentioned, set it to null.\n2. Convert all weight units to kilograms automatically.\n3. Convert all distance units to kilometers automatically.\n4. loadingDate: always output as ISO 8601 (YYYY-MM-DD). Resolve relative dates (e.g. \"tomorrow\") using today's date.\n5. isUrgent: set to true if text contains: ASAP, urgent, dnes, urgentně, ihned, co nejdříve.\n6. note: include any special cargo requirements (fragile, temperature-controlled, hazmat)."
             }
           ]
         },
         "batching": {}
       },
-      "id": "wf001-llm",
+      "id": "wf001l-llm",
       "name": "LLM Extract",
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.7,
@@ -62,9 +62,9 @@
     {
       "parameters": {
         "mode": "runOnceForEachItem",
-        "jsCode": "// WF-001 Validation Gate — universal\n// Change requiredFields per variant\n\nconst rawOutput = $input.item.json.text ?? $input.item.json.output;\nlet extractedData;\nlet isValid = true;\nlet errorMessages = [];\n\ntry {\n  extractedData = typeof rawOutput === 'string'\n    ? JSON.parse(rawOutput)\n    : rawOutput;\n} catch (error) {\n  return [{\n    json: {\n      status: \"error\",\n      errors: [\"Failed to parse LLM output as JSON\"],\n      rawData: rawOutput\n    }\n  }];\n}\n\nconst requiredFields = ['originCity', 'destinationCity', 'weightKg'];\n\nfor (const field of requiredFields) {\n  if (\n    !extractedData.hasOwnProperty(field) ||\n    extractedData[field] === null ||\n    extractedData[field] === \"\"\n  ) {\n    isValid = false;\n    errorMessages.push(`Missing critical field: ${field}`);\n  }\n}\n\nif (isValid) {\n  return [{ json: { status: \"success\", data: extractedData } }];\n} else {\n  return [{ json: { status: \"error\", errors: errorMessages, partialData: extractedData } }];\n}"
+        "jsCode": "// WF-001 Validation Gate — universal\n// Change requiredFields per variant\n\nconst rawOutput = $input.item.json.text ?? $input.item.json.output;\nlet extractedData;\nlet isValid = true;\nlet errorMessages = [];\n\ntry {\n  extractedData = typeof rawOutput === 'string'\n    ? JSON.parse(rawOutput)\n    : rawOutput;\n} catch (error) {\n  return [{\n    json: {\n      status: \"error\",\n      errors: [\"Failed to parse LLM output as JSON\"],\n      rawData: rawOutput\n    }\n  }];\n}\n\nconst requiredFields = ['loadingCity', 'deliveryCity', 'cargoWeightKg'];\n\nfor (const field of requiredFields) {\n  if (\n    !extractedData.hasOwnProperty(field) ||\n    extractedData[field] === null ||\n    extractedData[field] === \"\"\n  ) {\n    isValid = false;\n    errorMessages.push(`Missing critical field: ${field}`);\n  }\n}\n\nif (isValid) {\n  return [{ json: { status: \"success\", data: extractedData } }];\n} else {\n  return [{ json: { status: \"error\", errors: errorMessages, partialData: extractedData } }];\n}"
       },
-      "id": "wf001-validation",
+      "id": "wf001l-validation",
       "name": "Validation Gate",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -85,7 +85,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "wf001-cond-success",
+                    "id": "wf001l-cond-success",
                     "leftValue": "={{ $json.status }}",
                     "rightValue": "success",
                     "operator": {
@@ -109,7 +109,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "wf001-cond-error",
+                    "id": "wf001l-cond-error",
                     "leftValue": "={{ $json.status }}",
                     "rightValue": "error",
                     "operator": {
@@ -127,7 +127,7 @@
         },
         "options": {}
       },
-      "id": "wf001-switch",
+      "id": "wf001l-switch",
       "name": "Route by Status",
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
@@ -152,11 +152,14 @@
           "mappingMode": "defineBelow",
           "value": {
             "Datum přijetí": "={{ $now.toISO() }}",
-            "Odkud": "={{ $json.data.originCity }}",
-            "Kam": "={{ $json.data.destinationCity }}",
-            "Váha (kg)": "={{ $json.data.weightKg }}",
+            "Odkud": "={{ $json.data.loadingCity }}",
+            "Kam": "={{ $json.data.deliveryCity }}",
+            "Váha (kg)": "={{ $json.data.cargoWeightKg }}",
+            "Palety": "={{ $json.data.pallets }}",
+            "Datum nakládky": "={{ $json.data.loadingDate }}",
+            "Vzdálenost (km)": "={{ $json.data.estimatedDistanceKm }}",
             "Urgentní": "={{ $json.data.isUrgent }}",
-            "Status": "Nová poptávka"
+            "Poznámka": "={{ $json.data.note }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -164,13 +167,16 @@
             { "id": "Odkud", "displayName": "Odkud", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
             { "id": "Kam", "displayName": "Kam", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
             { "id": "Váha (kg)", "displayName": "Váha (kg)", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Palety", "displayName": "Palety", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Datum nakládky", "displayName": "Datum nakládky", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Vzdálenost (km)", "displayName": "Vzdálenost (km)", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
             { "id": "Urgentní", "displayName": "Urgentní", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
-            { "id": "Status", "displayName": "Status", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true }
+            { "id": "Poznámka", "displayName": "Poznámka", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true }
           ]
         },
         "options": {}
       },
-      "id": "wf001-sheets",
+      "id": "wf001l-sheets",
       "name": "Google Sheets",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.5,
@@ -194,7 +200,7 @@
         "text": "=⚠️ *WF-001: Neúplná poptávka*\n\nByla přijata poptávka, ale chybí kritická data:\n{{ $json.errors.join('\\n• ') }}\n\nČástečná data:\n{{ JSON.stringify($json.partialData, null, 2) }}\n\n👉 Zkontrolujte prosím ručně a doplňte.",
         "otherOptions": {}
       },
-      "id": "wf001-slack",
+      "id": "wf001l-slack",
       "name": "Slack Alert",
       "type": "n8n-nodes-base.slack",
       "typeVersion": 2.2,
@@ -205,99 +211,34 @@
           "name": "Slack account"
         }
       }
-    },
-    {
-      "parameters": {
-        "content": "## WF-001 — Inteligentní extraktor\n\n**Trigger:** Webhook POST `/wf-001-extract`\n\nTestovací payload:\n```json\n{\n  \"body\": {\n    \"text\": \"Dobrý den, potřebujeme odvézt 3 palety z Brna do Hamburku. Celková váha je cca 1450 kg. Prosím o rychlou kalkulaci.\"\n  }\n}\n```\n\n**Alternativa:** Nahraďte Webhook uzlem `Email Trigger (IMAP)` — výstup zůstane v `$json.body.text`.\n\n**Temperature:** 0 (OpenAI Chat Model → Options)\n\n**Povinná pole:** originCity, destinationCity, weightKg",
-        "height": 340,
-        "width": 420
-      },
-      "id": "wf001-sticky",
-      "name": "Sticky Note",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [-220, 80]
     }
   ],
   "connections": {
     "Webhook Trigger": {
-      "main": [
-        [
-          {
-            "node": "LLM Extract",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "LLM Extract", "type": "main", "index": 0 }]]
     },
     "OpenAI Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "LLM Extract",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
+      "ai_languageModel": [[{ "node": "LLM Extract", "type": "ai_languageModel", "index": 0 }]]
     },
     "LLM Extract": {
-      "main": [
-        [
-          {
-            "node": "Validation Gate",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Validation Gate", "type": "main", "index": 0 }]]
     },
     "Validation Gate": {
-      "main": [
-        [
-          {
-            "node": "Route by Status",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{ "node": "Route by Status", "type": "main", "index": 0 }]]
     },
     "Route by Status": {
       "main": [
-        [
-          {
-            "node": "Google Sheets",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Slack Alert",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        [{ "node": "Google Sheets", "type": "main", "index": 0 }],
+        [{ "node": "Slack Alert", "type": "main", "index": 0 }]
       ]
     }
   },
   "active": false,
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "versionId": "wf001-v1",
+  "settings": { "executionOrder": "v1" },
+  "versionId": "wf001l-v1",
   "meta": {
     "templateCredsSetupCompleted": false,
-    "instanceId": "wf001-ai-sme-integrator"
+    "instanceId": "wf001l-ai-sme-integrator"
   },
-  "tags": [
-    {
-      "name": "WF-001"
-    },
-    {
-      "name": "AI SME Integrator"
-    }
-  ]
+  "tags": [{ "name": "WF-001" }, { "name": "Logistics" }]
 }

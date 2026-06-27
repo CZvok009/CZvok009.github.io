@@ -1,0 +1,328 @@
+{
+  "name": "WF-001-MANUFACTURING: Výroba a průmysl",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wf-001-manufacturing",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "wf001m-webhook",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 300],
+      "webhookId": "wf-001-manufacturing"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {
+          "temperature": 0
+        }
+      },
+      "id": "wf001m-openai-model",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [300, 520],
+      "credentials": {
+        "openAiApi": {
+          "id": "CONFIGURE_ME",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "SystemMessagePromptTemplate",
+              "message": "You are an expert manufacturing incident data extraction parser operating in a strict automated pipeline.\nYour task is to extract structured information from shift reports, fault descriptions, or maintenance requests.\nYou must return ONLY a valid JSON object. Do not include markdown formatting, explanations, or any other text.\n\nRequired JSON structure:\n{\n  \"machineId\": \"string or null\",\n  \"unitsProduced\": \"number or null\",\n  \"unitsDefective\": \"number or null\",\n  \"downtimeMinutes\": \"number or null\",\n  \"asset_id\": \"string or null\",\n  \"criticality\": \"low|medium|high|critical or null\",\n  \"system_affected\": \"string or null\",\n  \"action_required\": \"string or null\"\n}\n\nExtraction rules:\n1. If a value is not explicitly mentioned, set it to null.\n2. machineId / asset_id: extract any machine identifier, serial number, or line designation.\n3. criticality: infer from context — \"critical\" if production is halted, \"high\" if defect rate > 3%.\n4. downtimeMinutes: convert hours to minutes if needed.\n5. action_required: one concrete maintenance action in imperative form."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "wf001m-llm",
+      "name": "LLM Extract",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [300, 300]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// WF-001 Validation Gate — universal\n// Change requiredFields per variant\n\nconst rawOutput = $input.item.json.text ?? $input.item.json.output;\nlet extractedData;\nlet isValid = true;\nlet errorMessages = [];\n\ntry {\n  extractedData = typeof rawOutput === 'string'\n    ? JSON.parse(rawOutput)\n    : rawOutput;\n} catch (error) {\n  return [{\n    json: {\n      status: \"error\",\n      errors: [\"Failed to parse LLM output as JSON\"],\n      rawData: rawOutput\n    }\n  }];\n}\n\nconst requiredFields = ['machineId', 'criticality', 'action_required'];\n\nfor (const field of requiredFields) {\n  if (\n    !extractedData.hasOwnProperty(field) ||\n    extractedData[field] === null ||\n    extractedData[field] === \"\"\n  ) {\n    isValid = false;\n    errorMessages.push(`Missing critical field: ${field}`);\n  }\n}\n\nif (isValid) {\n  return [{ json: { status: \"success\", data: extractedData } }];\n} else {\n  return [{ json: { status: \"error\", errors: errorMessages, partialData: extractedData } }];\n}"
+      },
+      "id": "wf001m-validation",
+      "name": "Validation Gate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "wf001m-cond-success",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "success",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "success"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "wf001m-cond-error",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "error",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "error"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf001m-switch",
+      "name": "Route by Status",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "wf001m-cond-critical",
+                    "leftValue": "={{ $json.data.criticality }}",
+                    "rightValue": "critical",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "critical"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "id": "wf001m-switch-critical",
+      "name": "Route by Criticality",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [1140, 180]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "CONFIGURE_ME",
+          "cachedResultName": "Výrobní incidenty"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Sheet1",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Datum": "={{ $now.toISO() }}",
+            "Stroj ID": "={{ $json.data.machineId }}",
+            "Vyrobeno ks": "={{ $json.data.unitsProduced }}",
+            "Zmetky ks": "={{ $json.data.unitsDefective }}",
+            "Prostoj (min)": "={{ $json.data.downtimeMinutes }}",
+            "Závažnost": "={{ $json.data.criticality }}",
+            "Systém": "={{ $json.data.system_affected }}",
+            "Akce": "={{ $json.data.action_required }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "Datum", "displayName": "Datum", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Stroj ID", "displayName": "Stroj ID", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Vyrobeno ks", "displayName": "Vyrobeno ks", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Zmetky ks", "displayName": "Zmetky ks", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Prostoj (min)", "displayName": "Prostoj (min)", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Závažnost", "displayName": "Závažnost", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Systém", "displayName": "Systém", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Akce", "displayName": "Akce", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf001m-sheets",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1380, 120],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "CONFIGURE_ME",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "CONFIGURE_ME",
+          "cachedResultName": "#vyroba-alerts"
+        },
+        "text": "=⚠️ *WF-001: Neúplná poptávka*\n\nByla přijata poptávka, ale chybí kritická data:\n{{ $json.errors.join('\\n• ') }}\n\nČástečná data:\n{{ JSON.stringify($json.partialData, null, 2) }}\n\n👉 Zkontrolujte prosím ručně a doplňte.",
+        "otherOptions": {}
+      },
+      "id": "wf001m-slack",
+      "name": "Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [1200, 420],
+      "credentials": {
+        "slackApi": {
+          "id": "CONFIGURE_ME",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "CONFIGURE_ME",
+          "cachedResultName": "#vyroba-kritické"
+        },
+        "text": "=<!channel> 🚨 *KRITICKÁ ZÁVADA — okamžitý zásah*\nStroj: {{ $json.data.machineId }}\nSystém: {{ $json.data.system_affected }}\nAkce: {{ $json.data.action_required }}",
+        "otherOptions": {}
+      },
+      "id": "wf001m-slack-critical",
+      "name": "Slack Critical Escalation",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [1380, 300],
+      "credentials": {
+        "slackApi": {
+          "id": "CONFIGURE_ME",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## WF-001-MANUFACTURING\n\n**Bonus:** Nahraďte Webhook uzlem Whisper (OpenAI) pro audio přepis — výstup připojte přes Set node na `$json.body.text`.",
+        "height": 120,
+        "width": 380
+      },
+      "id": "wf001m-sticky",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-200, 80]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [[{ "node": "LLM Extract", "type": "main", "index": 0 }]]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [[{ "node": "LLM Extract", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "LLM Extract": {
+      "main": [[{ "node": "Validation Gate", "type": "main", "index": 0 }]]
+    },
+    "Validation Gate": {
+      "main": [[{ "node": "Route by Status", "type": "main", "index": 0 }]]
+    },
+    "Route by Status": {
+      "main": [
+        [{ "node": "Route by Criticality", "type": "main", "index": 0 }],
+        [{ "node": "Slack Alert", "type": "main", "index": 0 }]
+      ]
+    },
+    "Route by Criticality": {
+      "main": [
+        [
+          { "node": "Slack Critical Escalation", "type": "main", "index": 0 },
+          { "node": "Google Sheets", "type": "main", "index": 0 }
+        ],
+        [{ "node": "Google Sheets", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "versionId": "wf001m-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "wf001m-ai-sme-integrator"
+  },
+  "tags": [{ "name": "WF-001" }, { "name": "Manufacturing" }]
+}
