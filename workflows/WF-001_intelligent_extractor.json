@@ -1,0 +1,303 @@
+{
+  "name": "WF-001: Inteligentní extraktor nestrukturovaných dat",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wf-001-extract",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "wf001-webhook",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 300],
+      "webhookId": "wf-001-extract"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o",
+          "cachedResultName": "gpt-4o"
+        },
+        "options": {
+          "temperature": 0
+        }
+      },
+      "id": "wf001-openai-model",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [300, 520],
+      "credentials": {
+        "openAiApi": {
+          "id": "CONFIGURE_ME",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "SystemMessagePromptTemplate",
+              "message": "You are an expert data extraction parser operating in a strict automated pipeline.\nYour task is to extract structured information from the provided unstructured user text.\nYou must return ONLY a valid JSON object. Do not include markdown formatting, explanations, or any other text.\n\nRequired JSON structure:\n{\n  \"originCity\": \"string or null\",\n  \"destinationCity\": \"string or null\",\n  \"weightKg\": \"number or null\",\n  \"isUrgent\": \"boolean\"\n}\n\nExtraction rules:\n1. If a specific value is not explicitly mentioned in the text, you must set its value to null.\n2. Convert all weight units to kilograms (Kg) automatically.\n3. If the text contains words implying fast processing (e.g., ASAP, urgent, dnes, urgentně), set \"isUrgent\" to true."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "id": "wf001-llm",
+      "name": "LLM Extract",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [300, 300]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// WF-001 Validation Gate\n// Validates LLM JSON output before passing to ERP/Database\n// Returns status: \"success\" | \"error\"\n\nconst rawOutput = $input.item.json.text;\nlet extractedData;\nlet isValid = true;\nlet errorMessages = [];\n\n// Parse LLM output — LLM může vrátit string nebo objekt\ntry {\n  extractedData = typeof rawOutput === 'string'\n    ? JSON.parse(rawOutput)\n    : rawOutput;\n} catch (error) {\n  return [{\n    json: {\n      status: \"error\",\n      errors: [\"Failed to parse LLM output as JSON\"],\n      rawData: rawOutput\n    }\n  }];\n}\n\n// Pole, která MUSÍ být vyplněna pro průchod do ERP\nconst requiredFields = ['originCity', 'destinationCity', 'weightKg'];\n\nfor (const field of requiredFields) {\n  if (\n    !extractedData.hasOwnProperty(field) ||\n    extractedData[field] === null ||\n    extractedData[field] === \"\"\n  ) {\n    isValid = false;\n    errorMessages.push(`Missing critical field: ${field}`);\n  }\n}\n\nif (isValid) {\n  return [{\n    json: {\n      status: \"success\",\n      data: extractedData\n    }\n  }];\n} else {\n  return [{\n    json: {\n      status: \"error\",\n      errors: errorMessages,\n      partialData: extractedData\n    }\n  }];\n}"
+      },
+      "id": "wf001-validation",
+      "name": "Validation Gate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 300]
+    },
+    {
+      "parameters": {
+        "mode": "rules",
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "wf001-cond-success",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "success",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "success"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "wf001-cond-error",
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "error",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "error"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf001-switch",
+      "name": "Route by Status",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "CONFIGURE_ME",
+          "cachedResultName": "Poptávky"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "Sheet1",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Datum přijetí": "={{ $now.toISO() }}",
+            "Odkud": "={{ $json.data.originCity }}",
+            "Kam": "={{ $json.data.destinationCity }}",
+            "Váha (kg)": "={{ $json.data.weightKg }}",
+            "Urgentní": "={{ $json.data.isUrgent }}",
+            "Status": "Nová poptávka"
+          },
+          "matchingColumns": [],
+          "schema": [
+            { "id": "Datum přijetí", "displayName": "Datum přijetí", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Odkud", "displayName": "Odkud", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Kam", "displayName": "Kam", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Váha (kg)", "displayName": "Váha (kg)", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Urgentní", "displayName": "Urgentní", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true },
+            { "id": "Status", "displayName": "Status", "required": false, "defaultMatch": false, "display": true, "type": "string", "canBeUsedToMatch": true }
+          ]
+        },
+        "options": {}
+      },
+      "id": "wf001-sheets",
+      "name": "Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [1200, 180],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "CONFIGURE_ME",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "CONFIGURE_ME",
+          "cachedResultName": "#dispecink-alerts"
+        },
+        "text": "=⚠️ *WF-001: Neúplná poptávka*\n\nByla přijata poptávka, ale chybí kritická data:\n{{ $json.errors.join('\\n• ') }}\n\nČástečná data:\n{{ JSON.stringify($json.partialData, null, 2) }}\n\n👉 Zkontrolujte prosím ručně a doplňte.",
+        "otherOptions": {}
+      },
+      "id": "wf001-slack",
+      "name": "Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [1200, 420],
+      "credentials": {
+        "slackApi": {
+          "id": "CONFIGURE_ME",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## WF-001 — Inteligentní extraktor\n\n**Trigger:** Webhook POST `/wf-001-extract`\n\nTestovací payload:\n```json\n{\n  \"body\": {\n    \"text\": \"Dobrý den, potřebujeme odvézt 3 palety z Brna do Hamburku. Celková váha je cca 1450 kg. Prosím o rychlou kalkulaci.\"\n  }\n}\n```\n\n**Alternativa:** Nahraďte Webhook uzlem `Email Trigger (IMAP)` — výstup zůstane v `$json.body.text`.\n\n**Temperature:** 0 (OpenAI Chat Model → Options)\n\n**Povinná pole:** originCity, destinationCity, weightKg",
+        "height": 340,
+        "width": 420
+      },
+      "id": "wf001-sticky",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-220, 80]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "LLM Extract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "LLM Extract",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Extract": {
+      "main": [
+        [
+          {
+            "node": "Validation Gate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validation Gate": {
+      "main": [
+        [
+          {
+            "node": "Route by Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Status": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "wf001-v1",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "wf001-ai-sme-integrator"
+  },
+  "tags": [
+    {
+      "name": "WF-001"
+    },
+    {
+      "name": "AI SME Integrator"
+    }
+  ]
+}
